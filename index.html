@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Цитадель: Эпоха Империй</title>
+    <style>
+        :root {
+            --gold: #ffc107; --stone: #607d8b; --stone-drk: #263238;
+            --wood: #4e342e; --skin: #ffccbc;
+        }
+        body { margin: 0; background: #1b5e20; font-family: 'Segoe UI', Tahoma, sans-serif; color: white; overflow: hidden; }
+
+        /* ГРАДИЕНТНЫЕ КНОПКИ */
+        .btn-grad {
+            background: linear-gradient(-45deg, #3e2723, #5d4037, #8d6e63, #3e2723);
+            background-size: 400% 400%;
+            animation: gradient-anim 5s ease infinite;
+            border: 2px solid var(--gold);
+            color: white;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: 0.3s;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        @keyframes gradient-anim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .btn-grad:hover { transform: translateY(-2px); filter: brightness(1.2); }
+        .btn-grad:disabled { opacity: 0.3; cursor: not-allowed; animation: none; }
+
+        /* МЕНЕДЖЕР ПРОФИЛЕЙ */
+        #profile-bar {
+            position: absolute; top: 10px; left: 340px; display: flex; gap: 8px; z-index: 2000;
+            background: rgba(0,0,0,0.5); padding: 5px; border-radius: 10px;
+        }
+        .profile-btn {
+            padding: 5px 12px; background: #333; border: 1px solid var(--gold); color: #fff;
+            cursor: pointer; border-radius: 4px; font-size: 12px;
+        }
+        .profile-btn.active { background: var(--gold); color: #000; font-weight: bold; }
+        .add-prof { background: #2e7d32; border-color: #fff; }
+
+        /* ИНТЕРФЕЙС */
+        #ui { position: absolute; left: 0; top: 0; width: 320px; height: 100vh; background: #111; 
+              padding: 20px; border-right: 5px solid var(--gold); z-index: 1000; box-shadow: 10px 0 20px rgba(0,0,0,0.8); box-sizing: border-box;}
+        .stat { font-size: 22px; margin-bottom: 10px; color: var(--gold); font-weight: bold; }
+        .army-box { background: #222; padding: 10px; border-radius: 8px; margin: 15px 0; border: 1px solid #444; font-size: 12px; min-height: 40px;}
+        
+        #ui button { width: 100%; padding: 12px; margin: 4px 0; }
+        #battle-btn { background: linear-gradient(-45deg, #b71c1c, #d32f2f, #f44336, #b71c1c); background-size: 400% 400%; font-size: 18px; margin-top: 15px; }
+
+        /* ГРАФИКА (Дворец и Дождь) */
+        .rain { position: absolute; width: 2px; height: 20px; background: rgba(255,255,255,0.2); animation: fall 0.8s linear infinite; z-index: 500; pointer-events: none; }
+        @keyframes fall { to { transform: translateY(100vh) translateX(-40px); } }
+
+        #castle-wrap { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 280px; height: 450px; z-index: 100; }
+        .palace-base { position: absolute; bottom: 0; width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
+        .tower { background: linear-gradient(to right, var(--stone), var(--stone-drk)); border: 3px solid #111; position: relative; }
+        .t-side { width: 60px; height: 65%; border-radius: 5px 5px 0 0; }
+        .t-main { width: 160px; height: 95%; margin: 0 -5px; z-index: 2; border-radius: 10px 10px 0 0; }
+        .dome { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 100px; height: 50px; background: #455a64; border-radius: 50% 50% 0 0; border: 2px solid #111; }
+        #gate { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 80px; height: 100px; background: #3e2723; border: 3px solid var(--gold); border-radius: 40px 40px 0 0; transition: 1s; z-index: 10; }
+        #gate.open { transform: translateX(-50%) scaleY(0.1); transform-origin: bottom; }
+
+        /* ЮНИТЫ */
+        .unit { position: absolute; width: 50px; height: 80px; transition: left 0.3s, top 0.3s; z-index: 200; }
+        .h-head { width: 16px; height: 16px; background: var(--skin); border-radius: 50%; position: absolute; top: 0; left: 17px; border: 1.5px solid #000; }
+        .h-body { width: 22px; height: 30px; background: #1565c0; border: 1.5px solid #000; position: absolute; top: 16px; left: 14px; border-radius: 4px; }
+        .h-leg { width: 8px; height: 25px; background: #222; position: absolute; top: 46px; border-radius: 2px; transform-origin: top; }
+        .l { left: 14px; } .r { left: 28px; }
+        .w-ico { position: absolute; font-size: 24px; top: 10px; right: -15px; filter: drop-shadow(0 0 3px white); }
+        .veteran::before { content: '⭐'; position: absolute; top: -25px; left: 18px; color: gold; font-size: 16px; animation: glow 1s infinite alternate; }
+        @keyframes glow { from { opacity: 0.5; } to { opacity: 1; } }
+        .walking .l { animation: step 0.3s infinite alternate; }
+        .walking .r { animation: step 0.3s infinite alternate-reverse; }
+        @keyframes step { from { transform: rotate(-25deg); } to { transform: rotate(25deg); } }
+        .hp-bar { position: absolute; top: -15px; width: 100%; height: 5px; background: #000; border: 1px solid #fff; }
+        .hp-fill { height: 100%; background: #4caf50; width: 100%; }
+
+        #field { position: absolute; left: 320px; top: 0; right: 0; bottom: 0; background: radial-gradient(circle, #2e7d32, #1b5e20); }
+        #log { position: absolute; bottom: 20px; right: 20px; width: 350px; height: 120px; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 15px; font-size: 13px; border-radius: 10px; overflow: hidden;}
+    </style>
+</head>
+<body>
+
+<div id="profile-bar">
+    <div id="profile-list" style="display:flex; gap:5px;"></div>
+    <button class="profile-btn add-prof" onclick="createNewProfile()">[+] НОВЫЙ</button>
+</div>
+
+<div id="ui">
+    <div class="stat">💰 ЗОЛОТО: <span id="money">0</span></div>
+    <div class="stat">🏰 ДВОРЕЦ: <span id="lvl">1</span>/10</div>
+    <button class="btn-grad" onclick="addMoney()">💎 СОБРАТЬ НАЛОГИ</button>
+    <button class="btn-grad" id="upBtn" onclick="upgrade()">🏛️ УЛУЧШИТЬ ДВОРЕЦ (<span id="upCost">50</span>)</button>
+    <hr>
+    <div class="army-box">КАЗАРМЫ: <span id="armyCount">0</span> ВОИНОВ</div>
+    <button class="btn-grad" onclick="buy('sword')">⚔️ Мечник (5)</button>
+    <button class="btn-grad" onclick="buy('mace')">🔨 Булавоносец (25)</button>
+    <button class="btn-grad" onclick="buy('rider')">🏇 Всадник (50)</button>
+    <button class="btn-grad" onclick="buy('cannon')">💣 Пушкарь (100)</button>
+    <button class="btn-grad" onclick="buy('giant')">👹 ГИГАНТ (250)</button>
+    <button class="btn-grad" id="battle-btn" onclick="startBattle()">⚔️ В БОЙ!</button>
+    <button class="btn-grad" onclick="deleteCurrentProfile()" style="background: #333; font-size:10px; margin-top:20px; border-color: red;">УДАЛИТЬ ПРОФИЛЬ</button>
+</div>
+
+<div id="field">
+    <div id="castle-wrap">
+        <div class="palace-base">
+            <div class="tower t-side"></div>
+            <div class="tower t-main">
+                <div id="main-dome" class="dome"></div>
+                <div id="gate"></div>
+            </div>
+            <div class="tower t-side"></div>
+        </div>
+    </div>
+    <div id="units-layer"></div>
+    <div id="log">Система: Создайте профиль или выберите существующий!</div>
+</div>
+
+<script>
+    // --- ЗВУКИ ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSnd(f, t, d, v) {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+d);
+        o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d);
+    }
+
+    // --- МЕНЕДЖЕР ПРОФИЛЕЙ ---
+    let activeProfileName = "Крепость";
+    let profiles = {}; // { name: { data } }
+
+    const config = {
+        sword: { ico: '⚔️', cost: 5, hp: 100, dmg: 35, color: '#1565c0' },
+        mace: { ico: '🔨', cost: 25, hp: 130, dmg: 50, color: '#6d4c41' },
+        rider: { ico: '🏇', cost: 50, hp: 160, dmg: 70, color: '#1e88e5' },
+        cannon: { ico: '💣', cost: 100, hp: 100, dmg: 200, color: '#424242' },
+        giant: { ico: '👹', cost: 250, hp: 900, dmg: 300, color: '#1b5e20', scale: 1.6 }
+    };
+
+
+
+// 1. Поменяй ключ тут (добавь v3)
+    function initStorage() {
+        const saved = localStorage.getItem('citadel_profiles_v3'); 
+        if (saved) {
+            profiles = JSON.parse(saved);
+            activeProfileName = Object.keys(profiles)[0] || "Крепость";
+        }
+        
+        // Если база пуста (первый запуск v3), создаем "Крепость"
+        if (Object.keys(profiles).length === 0) {
+            profiles["Крепость"] = { money: 0, lvl: 1, upCost: 50, armyInv: [] };
+            activeProfileName = "Крепость";
+        }
+        
+        renderProfiles();
+        loadActiveProfile();
+    }
+
+    // 2. И поменяй ключ тут (тоже v3)
+    function saveAll() {
+        localStorage.setItem('citadel_profiles_v3', JSON.stringify(profiles));
+    }
+
+        function createNewProfile() {
+            const name = prompt("Введите имя нового пр:");
+            if (name && !profiles[name]) {
+                profiles[name] = { money: 0, lvl: 1, upCost: 50, armyInv: [] };
+                activeProfileName = name;
+                saveAll();
+                renderProfiles();
+                loadActiveProfile();
+            } else if (profiles[name]) {
+                alert("Имя занято!");
+            }
+        }
+
+    function renderProfiles() {
+        const list = document.getElementById('profile-list');
+        list.innerHTML = "";
+        Object.keys(profiles).forEach(name => {
+            const btn = document.createElement('button');
+            btn.className = `profile-btn ${name === activeProfileName ? 'active' : ''}`;
+            btn.innerText = name;
+            btn.onclick = () => switchProfile(name);
+            list.appendChild(btn);
+        });
+    }
+
+    function switchProfile(name) {
+        if (inBattle) return;
+        activeProfileName = name;
+        renderProfiles();
+        loadActiveProfile();
+        addLog("Переход на профиль: " + name);
+    }
+
+    function deleteCurrentProfile() {
+        if (Object.keys(profiles).length <= 1) return alert("Нельзя удалить единственный профиль!");
+        if (confirm(`Удалить профиль ${activeProfileName}?`)) {
+            delete profiles[activeProfileName];
+            activeProfileName = Object.keys(profiles)[0];
+            saveAll();
+            renderProfiles();
+            loadActiveProfile();
+        }
+    }
+
+    function saveAll() {
+        localStorage.setItem('citadel_profiles_v2', JSON.stringify(profiles));
+    }
+
+    function loadActiveProfile() {
+        const p = profiles[activeProfileName];
+        document.getElementById('money').innerText = p.money;
+        document.getElementById('lvl').innerText = p.lvl;
+        document.getElementById('upCost').innerText = p.upCost;
+        document.getElementById('armyCount').innerText = p.armyInv.length;
+        document.getElementById('main-dome').style.background = p.lvl >= 10 ? 'var(--gold)' : (p.lvl >= 5 ? '#78909c' : '#455a64');
+        updateButtons();
+    }
+
+    // --- ИГРОВАЯ ЛОГИКА ---
+    let inBattle = false, activeP = [], activeE = [];
+
+    // Дождь
+    for(let i=0; i<40; i++) {
+        let r = document.createElement('div'); r.className = 'rain';
+        r.style.left = Math.random() * 100 + '%'; r.style.animationDelay = Math.random() * 2 + 's';
+        document.body.appendChild(r);
+    }
+
+    function addMoney() { 
+        profiles[activeProfileName].money++; 
+        playSnd(900, 'sine', 0.1, 0.1); 
+        saveAll(); 
+        loadActiveProfile(); 
+    }
+
+    function upgrade() {
+        let p = profiles[activeProfileName];
+        if (p.money >= p.upCost && p.lvl < 10) {
+            p.money -= p.upCost; p.lvl++; p.upCost += 50;
+            playSnd(500, 'triangle', 0.5, 0.2);
+            saveAll(); loadActiveProfile();
+        }
+    }
+
+    function buy(type) {
+        let p = profiles[activeProfileName];
+        if (p.money >= config[type].cost) {
+            p.money -= config[type].cost;
+            p.armyInv.push({ type, level: 1, xp: 0 });
+            playSnd(1000, 'sine', 0.1, 0.1);
+            saveAll(); loadActiveProfile();
+        }
+    }
+
+    function updateButtons() {
+        let p = profiles[activeProfileName];
+        document.getElementById('upBtn').disabled = p.money < p.upCost || p.lvl >= 10;
+    }
+
+    function addLog(m) { const l = document.getElementById('log'); l.innerHTML = `> ${m}<br>${l.innerHTML}`; }
+
+    // --- БОЙ --- (Упрощенная логика из предыдущих версий)
+    function createUnit(u, isE, isB = false) {
+        const d = document.createElement('div');
+        d.className = 'unit walking' + (isE ? ' enemy' : '') + (u.level > 1 ? ' veteran' : '');
+        const c = isE ? (isB ? '#000' : '#b71c1c') : config[u.type].color;
+        const s = isB ? 2.5 : (config[u.type].scale || 1);
+        d.innerHTML = `<div class="hp-bar"><div class="hp-fill"></div></div><div class="h-head"></div><div class="h-body" style="background:${c}"></div><div class="h-leg l"></div><div class="h-leg r"></div><div class="w-ico">${isE ? (isB?'🐉':'💀') : config[u.type].ico}</div>`;
+        d.style.transform = `scale(${s}) ${isE ? 'scaleX(-1)' : ''}`;
+        document.getElementById('units-layer').appendChild(d);
+        return { dom: d, hp: isE ? (isB?2000:100) : (config[u.type].hp * (1+u.level*0.2)), maxHp: isE?(isB?2000:100) : (config[u.type].hp*(1+u.level*0.2)), data: u, isE, isB, x: isE?1000:300, y: 150+Math.random()*400, dmg: isE?(isB?100:20) : (config[u.type].dmg*(1+u.level*0.2)) };
+    }
+
+    function startBattle() {
+        let p = profiles[activeProfileName];
+        if (inBattle || p.armyInv.length === 0) return;
+        inBattle = true;
+        document.getElementById('gate').classList.add('open');
+        activeP = p.armyInv.map(u => createUnit(u, false));
+        let eCount = p.armyInv.length + 3;
+        for(let i=0; i<eCount; i++) activeE.push(createUnit({type:'sword', level:1}, true));
+        if(Math.random() > 0.5) activeE.push(createUnit({type:'sword', level:1}, true, true));
+
+        const loop = setInterval(() => {
+            if (activeP.length === 0 || activeE.length === 0) { clearInterval(loop); endBattle(); return; }
+            activeP.forEach(u => {
+                let target = activeE[0];
+                if (target && u.x < target.x - 50) { u.x += 12; u.dom.classList.add('walking'); }
+                else if(target) { u.dom.classList.remove('walking'); target.hp -= u.dmg/10; updateHP(target); }
+                u.dom.style.left = u.x + 'px'; u.dom.style.top = u.y + 'px';
+            });
+            activeE.forEach(e => {
+                let target = activeP[0];
+                if (target && e.x > target.x + 50) { e.x -= 10; e.dom.classList.add('walking'); }
+                else if(target) { e.dom.classList.remove('walking'); target.hp -= e.dmg/10; updateHP(target); }
+                e.dom.style.left = e.x + 'px'; e.dom.style.top = e.y + 'px';
+            });
+            activeP = activeP.filter(u => { if(u.hp <= 0) u.dom.remove(); return u.hp > 0; });
+            activeE = activeE.filter(e => { if(e.hp <= 0) { e.dom.remove(); profiles[activeProfileName].money += e.isB ? 300 : 20; activeP.forEach(p => p.data.xp++); } return e.hp > 0; });
+            loadActiveProfile();
+        }, 100);
+    }
+
+    function updateHP(u) { if(u.dom) u.dom.querySelector('.hp-fill').style.width = (u.hp/u.maxHp*100) + '%'; }
+
+    function endBattle() {
+        inBattle = false;
+        document.getElementById('gate').classList.remove('open');
+        profiles[activeProfileName].armyInv = activeP.map(u => {
+            let d = u.data;
+            if(d.xp >= 10) { d.level++; d.xp = 0; addLog("ВЕТЕРАН УРОВНЯ " + d.level); }
+            return d;
+        });
+        activeP.forEach(u => u.dom.remove()); activeE.forEach(e => e.dom.remove());
+        activeP = []; activeE = []; 
+        saveAll(); loadActiveProfile();
+    }
+
+    initStorage();
+</script>
+</body>
+</html>
