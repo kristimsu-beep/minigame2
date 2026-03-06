@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <title>Цитадель: Мини игра 2</title>
     <style>
+            @keyframes damagePop { 
+                0% { transform: translateY(0); opacity: 1; } 
+                100% { transform: translateY(-50px); opacity: 0; } 
+            }
+
         :root {
             --gold: #ffc107; --stone: #607d8b; --stone-drk: #263238;
             --wood: #4e342e; --skin: #ffccbc;
@@ -83,6 +88,7 @@
 
         #field { position: absolute; left: 320px; top: 0; right: 0; bottom: 0; background: radial-gradient(circle, #2e7d32, #1b5e20); }
         #log { position: absolute; bottom: 20px; right: 20px; width: 350px; height: 120px; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 15px; font-size: 13px; border-radius: 10px; overflow: hidden;}
+        
     </style>
 </head>
 <body>
@@ -104,6 +110,9 @@
     <button class="btn-grad" onclick="buy('rider')">🏇 Всадник (50)</button>
     <button class="btn-grad" onclick="buy('cannon')">💣 Пушкарь (100)</button>
     <button class="btn-grad" onclick="buy('giant')">👹 ГИГАНТ (250)</button>
+    <button class="btn-grad" onclick="buy('iron_guard')" style="border-color: #90a4ae;">🛡️ Жел. Страж (1000)</button>
+    <button class="btn-grad" onclick="buy('paladin')" style="border-color: #ffeb3b;">👑 Паладин (2500)</button>
+
     <button class="btn-grad" id="battle-btn" onclick="startBattle()">⚔️ В БОЙ!</button>
     <button class="btn-grad" onclick="deleteCurrentProfile()" style="background: #333; font-size:10px; margin-top:20px; border-color: red;">УДАЛИТЬ ПРОФИЛЬ</button>
 </div>
@@ -143,6 +152,9 @@
         rider: { ico: '🏇', cost: 50, hp: 160, dmg: 70, color: '#1e88e5' },
         cannon: { ico: '💣', cost: 100, hp: 100, dmg: 200, color: '#424242' },
         giant: { ico: '👹', cost: 250, hp: 900, dmg: 300, color: '#1b5e20', scale: 1.6 }
+            // Добавь это внутрь объекта config
+        iron_guard: { ico: '🛡️', cost: 1000, hp: 3000, dmg: 150, color: '#455a64', scale: 1.8 },
+        paladin: { ico: '👑', cost: 2500, hp: 7000, dmg: 400, color: '#fbc02d', scale: 2.2 
     };
 
 
@@ -238,12 +250,15 @@
         document.body.appendChild(r);
     }
 
-    function addMoney() { 
-        profiles[activeProfileName].money++; 
+     function addMoney() { 
+        let p = profiles[activeProfileName];
+        // Даем золото: уровень дворца * 5 (на 10 уровне будет +50 за клик)
+        p.money += (p.lvl * 5); 
         playSnd(900, 'sine', 0.1, 0.1); 
         saveAll(); 
         loadActiveProfile(); 
     }
+
 
     function upgrade() {
         let p = profiles[activeProfileName];
@@ -293,27 +308,74 @@
         for(let i=0; i<eCount; i++) activeE.push(createUnit({type:'sword', level:1}, true));
         if(Math.random() > 0.5) activeE.push(createUnit({type:'sword', level:1}, true, true));
 
-        const loop = setInterval(() => {
-            if (activeP.length === 0 || activeE.length === 0) { clearInterval(loop); endBattle(); return; }
-            activeP.forEach(u => {
-                let target = activeE[0];
-                if (target && u.x < target.x - 50) { u.x += 12; u.dom.classList.add('walking'); }
-                else if(target) { u.dom.classList.remove('walking'); target.hp -= u.dmg/10; updateHP(target); }
-                u.dom.style.left = u.x + 'px'; u.dom.style.top = u.y + 'px';
-            });
-            activeE.forEach(e => {
-                let target = activeP[0];
-                if (target && e.x > target.x + 50) { e.x -= 10; e.dom.classList.add('walking'); }
-                else if(target) { e.dom.classList.remove('walking'); target.hp -= e.dmg/10; updateHP(target); }
-                e.dom.style.left = e.x + 'px'; e.dom.style.top = e.y + 'px';
-            });
-            activeP = activeP.filter(u => { if(u.hp <= 0) u.dom.remove(); return u.hp > 0; });
-            activeE = activeE.filter(e => { if(e.hp <= 0) { e.dom.remove(); profiles[activeProfileName].money += e.isB ? 300 : 20; activeP.forEach(p => p.data.xp++); } return e.hp > 0; });
-            loadActiveProfile();
-        }, 100);
+    const loop = setInterval(() => {
+    // 1. Проверка окончания боя
+    if (activeP.length === 0 || activeE.length === 0) { 
+        clearInterval(loop); 
+        endBattle(); 
+        return; 
     }
+    
+    // 2. Логика твоих воинов (Атакуют ПЕРВОГО врага в списке)
+    activeP.forEach(u => {
+        let target = activeE[0]; 
+        if (target && u.x < target.x - 60) { 
+            u.x += 12; 
+            u.dom.classList.add('walking'); 
+        } else if(target) { 
+            u.dom.classList.remove('walking'); 
+            target.hp -= u.dmg / 10; 
+            updateHP(target); 
+            spawnDamage(target.x, target.y, u.dmg / 10); 
+        }
+        u.dom.style.left = u.x + 'px'; 
+        u.dom.style.top = u.y + 'px';
+        u.dom.style.zIndex = Math.floor(u.y); // Сортировка слоев (кто ниже, тот спереди)
+    });
 
-    function updateHP(u) { if(u.dom) u.dom.querySelector('.hp-fill').style.width = (u.hp/u.maxHp*100) + '%'; }
+    // 3. Логика врагов (Атакуют ПЕРВОГО твоего воина)
+    activeE.forEach(e => {
+        let target = activeP[0];
+        if (target && e.x > target.x + 60) { 
+            e.x -= 10; 
+            e.dom.classList.add('walking'); 
+        } else if(target) { 
+            e.dom.classList.remove('walking'); 
+            target.hp -= e.dmg / 10; 
+            updateHP(target); 
+            spawnDamage(target.x, target.y, e.dmg / 10);
+        }
+        // ИСПРАВЛЕНО: используем e.dom вместо u.dom
+        e.dom.style.left = e.x + 'px'; 
+        e.dom.style.top = e.y + 'px';
+        e.dom.style.zIndex = Math.floor(e.y);
+    });
+
+    // 4. Очистка погибших воинов
+    activeP = activeP.filter(u => { 
+        if(u.hp <= 0) { u.dom.remove(); return false; } 
+        return true; 
+    });
+
+    // 5. Очистка погибших врагов + Награда
+    activeE = activeE.filter(e => { 
+        if(e.hp <= 0) { 
+            e.dom.remove(); 
+            // Награда за обычного врага или Босса
+            profiles[activeProfileName].money += e.isB ? 300 : 20; 
+            // Прокачка опыта выжившим
+            activeP.forEach(p => p.data.xp++); 
+            updateUI(); // Обновляем цифры золота на экране сразу
+            return false; 
+        } 
+        return true; 
+    });
+
+}, 100);
+
+    function updateHP(u) { 
+        if(u.dom) u.dom.querySelector('.hp-fill').style.width = (u.hp/u.maxHp*100) + '%'; 
+    }
 
     function endBattle() {
         inBattle = false;
@@ -328,8 +390,19 @@
         saveAll(); loadActiveProfile();
     }
 
+    // Исправленная функция урона (с закрытой скобкой)
+    function spawnDamage(x, y, d) {
+        const p = document.createElement('div');
+        p.style.cssText = `position:absolute; left:${x}px; top:${y}px; color:#ff5252; 
+                          font-weight:bold; pointer-events:none; z-index:5000;
+                          animation: damagePop 0.8s forwards; font-family: Arial;`;
+        p.innerText = "-" + Math.floor(d);
+        document.getElementById('field').appendChild(p);
+        setTimeout(() => p.remove(), 800);
+    } // <-- Скобка была пропущена
+
     initStorage();
+
 </script>
 </body>
 </html>
-
