@@ -2,59 +2,75 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Цитадель: Эпоха Дронов</title>
+    <title>Цитадель: Эпоха Дронов (Максимальная версия)</title>
     <style>
+        /* АНИМАЦИИ */
         @keyframes damagePop { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-50px); opacity: 0; } }
-        @keyframes step { from { transform: rotate(-20deg); } to { transform: rotate(20deg); } }
+        @keyframes step { from { transform: rotate(-25deg); } to { transform: rotate(25deg); } }
         @keyframes fly { 0% { transform: translateY(0); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0); } }
-        
-        :root { --gold: #ffc107; --stone: #607d8b; --stone-drk: #263238; --skin: #ffccbc; --neon: #00f2ff; }
-        body { margin: 0; background: #1b5e20; font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
+        @keyframes gradient-anim { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes glow { from { opacity: 0.5; } to { opacity: 1; } }
+
+        :root { 
+            --gold: #ffc107; --stone: #607d8b; --stone-drk: #263238; 
+            --skin: #ffccbc; --neon: #00f2ff; 
+        }
+        body { margin: 0; background: #1b5e20; font-family: 'Segoe UI', Tahoma, sans-serif; color: white; overflow: hidden; }
 
         /* ИНТЕРФЕЙС */
-        #ui { position: absolute; left: 0; top: 0; width: 320px; height: 100vh; background: #111; padding: 15px; border-right: 4px solid var(--gold); z-index: 1000; box-sizing: border-box; overflow-y: auto;}
-        .stat { font-size: 18px; margin-bottom: 5px; color: var(--gold); font-weight: bold; }
-        .era-tag { background: var(--gold); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-bottom: 10px; display: inline-block; }
+        #ui { 
+            position: absolute; left: 0; top: 0; width: 320px; height: 100vh; background: #111; 
+            padding: 20px; border-right: 4px solid var(--gold); z-index: 1000; box-sizing: border-box; overflow-y: auto;
+        }
+        .stat { font-size: 20px; margin-bottom: 8px; color: var(--gold); font-weight: bold; }
+        .era-tag { background: var(--gold); color: #000; padding: 4px 10px; border-radius: 4px; font-size: 13px; margin-bottom: 15px; display: inline-block; font-weight: bold; }
         
         .btn-grad {
-            width: 100%; padding: 10px; margin: 3px 0; font-size: 11px;
-            background: linear-gradient(-45deg, #3e2723, #5d4037, #3e2723);
-            border: 1px solid var(--gold); color: white; cursor: pointer; border-radius: 4px; font-weight: bold; text-transform: uppercase;
+            width: 100%; padding: 12px; margin: 4px 0; font-size: 12px;
+            background: linear-gradient(-45deg, #3e2723, #5d4037, #8d6e63, #3e2723);
+            background-size: 400% 400%; animation: gradient-anim 5s ease infinite;
+            border: 2px solid var(--gold); color: white; cursor: pointer; border-radius: 6px; 
+            font-weight: bold; text-transform: uppercase; transition: 0.2s;
         }
-        .btn-grad:disabled { opacity: 0.3; cursor: not-allowed; }
-        #battle-btn { background: linear-gradient(to bottom, #f44336, #b71c1c); font-size: 16px; margin-top: 10px; height: 50px; }
+        .btn-grad:hover { transform: scale(1.02); filter: brightness(1.2); }
+        .btn-grad:disabled { opacity: 0.3; cursor: not-allowed; animation: none; }
+        #battle-btn { background: linear-gradient(to bottom, #f44336, #b71c1c); font-size: 18px; margin-top: 15px; height: 55px; }
 
         /* ПРОФИЛИ */
-        #profile-bar { position: absolute; top: 10px; left: 330px; display: flex; gap: 5px; z-index: 2000; }
-        .profile-btn { padding: 4px 10px; background: #222; border: 1px solid var(--gold); color: #fff; cursor: pointer; font-size: 11px; }
-        .profile-btn.active { background: var(--gold); color: #000; }
+        #profile-bar { position: absolute; top: 10px; left: 330px; display: flex; gap: 8px; z-index: 2000; }
+        .profile-btn { padding: 5px 12px; background: #222; border: 1px solid var(--gold); color: #fff; cursor: pointer; font-size: 12px; border-radius: 4px; }
+        .profile-btn.active { background: var(--gold); color: #000; font-weight: bold; }
 
-        /* КРЕПОСТЬ */
-        #castle-wrap { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 250px; height: 400px; display: flex; align-items: flex-end; justify-content: center; gap: 2px; }
-        .tower { background: linear-gradient(to right, var(--stone), var(--stone-drk)); border: 2px solid #111; transition: 0.5s; position: relative; }
-        .t-side { width: 50px; height: 40%; }
-        .t-main { width: 120px; height: 70%; z-index: 2; }
-        .dome { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); width: 80px; height: 40px; background: #455a64; border-radius: 40px 40px 0 0; border: 2px solid #111; }
-        #gate { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 60px; height: 70px; background: #3e2723; border: 2px solid var(--gold); border-radius: 30px 30px 0 0; transition: 1s; }
+        /* ПОЛЕ И КРЕПОСТЬ */
+        #field { position: absolute; left: 320px; top: 0; right: 0; bottom: 0; background: radial-gradient(circle, #2e7d32, #1b5e20); overflow: hidden; }
+        #castle-wrap { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 280px; height: 450px; z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
+        .tower { background: linear-gradient(to right, var(--stone), var(--stone-drk)); border: 3px solid #111; transition: 0.5s; position: relative; }
+        .t-side { width: 60px; height: 40%; border-radius: 5px 5px 0 0; }
+        .t-main { width: 150px; height: 70%; z-index: 2; border-radius: 10px 10px 0 0; margin: 0 -5px; }
+        .dome { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 100px; height: 50px; background: #455a64; border-radius: 50% 50% 0 0; border: 2px solid #111; }
+        #gate { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 70px; height: 90px; background: #3e2723; border: 2px solid var(--gold); border-radius: 35px 35px 0 0; transition: 1s; z-index: 5; }
         #gate.open { transform: translateX(-50%) scaleY(0.1); transform-origin: bottom; }
-        .decor { position: absolute; background: var(--gold); width: 100%; height: 5px; top: 20%; display: none; }
 
         /* ЮНИТЫ */
-        #field { position: absolute; left: 320px; top: 0; right: 0; bottom: 0; background: radial-gradient(circle, #2e7d32, #1b5e20); overflow: hidden; }
-        .unit { position: absolute; width: 40px; height: 60px; z-index: 100; }
-        .h-body { width: 20px; height: 25px; border: 1.5px solid #000; position: absolute; top: 15px; left: 10px; border-radius: 3px; }
-        .h-head { width: 14px; height: 14px; background: var(--skin); border-radius: 50%; position: absolute; top: 2px; left: 13px; border: 1.5px solid #000; }
-        .h-leg { width: 6px; height: 18px; background: #222; position: absolute; top: 40px; }
+        .unit { position: absolute; width: 50px; height: 80px; transition: left 0.1s linear, top 0.1s linear; z-index: 200; }
+        .h-body { width: 22px; height: 30px; border: 1.5px solid #000; position: absolute; top: 16px; left: 14px; border-radius: 4px; }
+        .h-head { width: 16px; height: 16px; background: var(--skin); border-radius: 50%; position: absolute; top: 0; left: 17px; border: 1.5px solid #000; }
+        .h-leg { width: 8px; height: 22px; background: #222; position: absolute; top: 46px; border-radius: 2px; transform-origin: top; }
+        .l { left: 14px; } .r { left: 28px; }
         .walking .l { animation: step 0.3s infinite alternate; }
         .walking .r { animation: step 0.3s infinite alternate-reverse; }
         
-        .hp-bar { position: absolute; top: -12px; width: 100%; height: 4px; background: #000; border: 1px solid #fff; }
-        .hp-fill { height: 100%; background: #4caf50; width: 100%; }
-        .xp-bar { position: absolute; top: -18px; width: 100%; height: 3px; background: #111; border: 1px solid #fff; }
-        .xp-fill { height: 100%; background: #2196f3; width: 0%; max-width: 100%; }
+        .hp-bar { position: absolute; top: -15px; width: 100%; height: 5px; background: #000; border: 1px solid #fff; }
+        .hp-fill { height: 100%; background: #4caf50; width: 100%; transition: 0.1s; }
+        .xp-bar { position: absolute; top: -22px; width: 100%; height: 3px; background: #111; border: 1px solid #fff; overflow: hidden; }
+        .xp-fill { height: 100%; background: #2196f3; width: 0%; max-width: 100%; transition: 0.3s; }
         
-        .drone { width: 15px; height: 10px; background: #00f2ff; border-radius: 50%; animation: fly 0.5s infinite; }
-        #log { position: absolute; bottom: 15px; right: 15px; width: 300px; height: 100px; background: rgba(0,0,0,0.8); border: 2px solid var(--gold); padding: 10px; font-size: 11px; overflow-y: auto; z-index: 2000; }
+        .w-ico { position: absolute; font-size: 24px; top: 10px; right: -15px; filter: drop-shadow(0 0 3px white); }
+        .veteran::before { content: '⭐'; position: absolute; top: -45px; left: 18px; color: gold; font-size: 16px; animation: glow 1s infinite alternate; }
+
+        .drone-mini { position: absolute; width: 12px; height: 8px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 8px var(--neon); z-index: 500; }
+
+        #log { position: absolute; bottom: 20px; right: 20px; width: 350px; height: 120px; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 15px; font-size: 13px; border-radius: 10px; overflow-y: auto; color: white; z-index: 3000; }
     </style>
 </head>
 <body>
@@ -65,7 +81,7 @@
 </div>
 
 <div id="ui">
-    <div id="era-display" class="era-tag">ЭПОХА: СРЕДНЕВЕКОВЬЕ</div>
+    <div id="era-tag" class="era-tag">ЭПОХА: СРЕДНЕВЕКОВЬЕ</div>
     <div class="stat">💰 ЗОЛОТО: <span id="money">0</span></div>
     <div class="stat">🏰 ДВОРЕЦ: <span id="lvl">1</span>/10</div>
     <div class="stat">⚔️ БОЙ: <span id="battleNum">1</span></div>
@@ -74,7 +90,7 @@
     <button class="btn-grad" id="upBtn" onclick="upgrade()">🏛️ УЛУЧШИТЬ ДВОРЕЦ (<span id="upCost">50</span>)</button>
     <hr>
     
-    <div id="shop-era-1">
+    <div id="shop-1">
         <button class="btn-grad" onclick="buy('sword')">⚔️ Мечник (5)</button>
         <button class="btn-grad" onclick="buy('mace')">🔨 Булавоносец (25)</button>
         <button class="btn-grad" onclick="buy('rider')">🏇 Всадник (50)</button>
@@ -84,7 +100,7 @@
         <button class="btn-grad" onclick="buy('armored_car')">🚜 Броневик (2500)</button>
     </div>
 
-    <div id="shop-era-2" style="display:none;">
+    <div id="shop-2" style="display:none;">
         <button class="btn-grad" onclick="buy('soldier')" style="border-color:var(--neon)">🔫 Автоматчик (5k)</button>
         <button class="btn-grad" onclick="buy('heavy')" style="border-color:var(--neon)">🔥 Миниганер (10k)</button>
         <button class="btn-grad" onclick="buy('tank')" style="border-color:var(--neon)">📟 Танк T-90 (25k)</button>
@@ -93,26 +109,34 @@
     </div>
 
     <button class="btn-grad" id="battle-btn" onclick="startBattle()">⚔️ В БОЙ!</button>
-    <button id="nextEraBtn" class="btn-grad" onclick="checkEraTransfer()" style="display:none; background:var(--gold); color:#000;">➡️ СЛЕДУЮЩАЯ ЭРА</button>
+    <button id="era-btn" class="btn-grad" onclick="checkEraTransfer()" style="display:none; background:var(--neon); color:#000;">🚀 СЛЕДУЮЩАЯ ЭРА</button>
+    <button class="btn-grad" onclick="deleteCurrentProfile()" style="background: #333; font-size:10px; margin-top:20px; border-color: red;">УДАЛИТЬ ПРОФИЛЬ</button>
 </div>
 
 <div id="field">
     <div id="castle-wrap">
         <div class="tower t-side" id="ts1"></div>
-        <div class="tower t-main" id="tm">
-            <div id="main-dome" class="dome"></div>
-            <div id="gate"></div>
-            <div class="decor" id="d1"></div>
-        </div>
+        <div class="tower t-main" id="tm"><div id="main-dome" class="dome"></div><div id="gate"></div></div>
         <div class="tower t-side" id="ts2"></div>
     </div>
     <div id="units-layer"></div>
-    <div id="log">Система: Развивайте крепость!</div>
+    <div id="log">Система: Нанимайте армию и развивайтесь!</div>
 </div>
 
 <script>
+    // --- ЗВУКОВОЙ ДВИЖОК ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSnd(f, t, d, v) {
+        try {
+            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+            o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+            g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+d);
+            o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d);
+        } catch(e){}
+    }
+
+    // --- КОНФИГУРАЦИЯ ---
     const config = {
-        // ERA 1
         sword: { ico: '⚔️', cost: 5, hp: 100, dmg: 35, color: '#1565c0' },
         mace: { ico: '🔨', cost: 25, hp: 130, dmg: 50, color: '#6d4c41' },
         rider: { ico: '🏇', cost: 50, hp: 160, dmg: 70, color: '#1e88e5' },
@@ -121,16 +145,17 @@
         iron_guard: { ico: '🛡️', cost: 1000, hp: 4000, dmg: 180, color: '#455a64', scale: 1.8 },
         armored_car: { ico: '🚜', cost: 2500, hp: 12000, dmg: 500, color: '#37474f', scale: 2.2 },
         // ERA 2
-        soldier: { ico: '🔫', cost: 5000, hp: 15000, dmg: 1200, color: '#2e7d32', era: 2 },
-        heavy: { ico: '🔥', cost: 10000, hp: 30000, dmg: 3000, color: '#c62828', era: 2, scale: 1.3 },
-        tank: { ico: '📟', cost: 25000, hp: 80000, dmg: 8000, color: '#1b5e20', era: 2, scale: 2.5 },
-        jet: { ico: '✈️', cost: 50000, hp: 50000, dmg: 15000, color: '#37474f', era: 2, isFly: true, scale: 2.5 },
-        general: { ico: '🎖️', cost: 100000, hp: 100000, dmg: 20000, color: '#1a237e', era: 2, isGeneral: true }
+        soldier: { ico: '🔫', cost: 5000, hp: 25000, dmg: 1500, color: '#2e7d32' },
+        heavy: { ico: '🔥', cost: 10000, hp: 50000, dmg: 4000, color: '#c62828', scale: 1.3 },
+        tank: { ico: '📟', cost: 25000, hp: 120000, dmg: 9000, color: '#1b5e20', scale: 2.5 },
+        jet: { ico: '✈️', cost: 50000, hp: 80000, dmg: 20000, color: '#37474f', scale: 2.8 },
+        general: { ico: '🎖️', cost: 100000, hp: 200000, dmg: 30000, color: '#1a237e', isGeneral: true }
     };
 
     let activeProfileName = "", profiles = {}, inBattle = false, activeP = [], activeE = [];
-    const STORAGE_KEY = 'citadel_v7';
+    const STORAGE_KEY = 'citadel_v9_mega';
 
+    // --- СИСТЕМА ПРОФИЛЕЙ ---
     function init() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if(saved) profiles = JSON.parse(saved);
@@ -145,60 +170,87 @@
 
     function loadProfile() {
         const p = profiles[activeProfileName];
-        document.getElementById('money').innerText = p.money;
+        document.getElementById('money').innerText = Math.floor(p.money);
         document.getElementById('lvl').innerText = p.lvl;
         document.getElementById('upCost').innerText = p.upCost;
         document.getElementById('battleNum').innerText = p.battleNum;
-        document.getElementById('era-display').innerText = `ЭПОХА: ${p.era === 1 ? 'СРЕДНЕВЕКОВЬЕ' : 'СОВРЕМЕННОСТЬ'}`;
+        document.getElementById('era-tag').innerText = `ЭПОХА: ${p.era === 1 ? 'СРЕДНЕВЕКОВЬЕ' : 'МОДЕРН'}`;
         
-        document.getElementById('shop-era-1').style.display = p.era === 1 ? 'block' : 'none';
-        document.getElementById('shop-era-2').style.display = p.era === 2 ? 'block' : 'none';
+        document.getElementById('shop-1').style.display = p.era === 1 ? 'block' : 'none';
+        document.getElementById('shop-2').style.display = p.era === 2 ? 'block' : 'none';
         
-        // Показываем кнопку перехода, если условия выполнены
-        const hasAll = ['sword','mace','rider','cannon','giant','iron_guard','armored_car'].every(type => p.armyInv.some(u => u.type === type));
-        document.getElementById('nextEraBtn').style.display = (p.era === 1 && p.lvl >= 10 && hasAll) ? 'block' : 'none';
+        const hasAll = ['sword','mace','rider','cannon','giant','iron_guard','armored_car'].every(t => p.armyInv.some(u => u.type === t));
+        document.getElementById('era-btn').style.display = (p.era === 1 && p.lvl >= 10 && hasAll) ? 'block' : 'none';
         
         updateCastleGraphics(p.lvl, p.era);
     }
 
+    function renderProfiles() {
+        const list = document.getElementById('profile-list'); list.innerHTML = "";
+        Object.keys(profiles).forEach(n => {
+            const b = document.createElement('button'); b.className = `profile-btn ${n===activeProfileName?'active':''}`;
+            b.innerText = n; b.onclick = () => { if(!inBattle){ activeProfileName=n; renderProfiles(); loadProfile(); } };
+            list.appendChild(b);
+        });
+    }
+
+    function deleteCurrentProfile() {
+        if(Object.keys(profiles).length <= 1) return alert("Нельзя удалить последний профиль!");
+        if(confirm("Удалить профиль?")) { delete profiles[activeProfileName]; location.reload(); }
+    }
+
+    // --- КРЕПОСТЬ ---
     function updateCastleGraphics(lvl, era) {
         const ts1 = document.getElementById('ts1'), ts2 = document.getElementById('ts2'), tm = document.getElementById('tm');
-        const color = era === 2 ? '#37474f' : '#607d8b';
+        const color = era === 2 ? '#263238' : '#607d8b';
         const borderColor = era === 2 ? '#00f2ff' : '#ffc107';
         
-        ts1.style.height = (30 + lvl * 4) + '%';
-        ts2.style.height = (30 + lvl * 4) + '%';
-        tm.style.height = (60 + lvl * 3) + '%';
+        ts1.style.height = (35 + lvl * 4) + '%';
+        ts2.style.height = (35 + lvl * 4) + '%';
+        tm.style.height = (65 + lvl * 3) + '%';
         
         [ts1, ts2, tm].forEach(el => {
             el.style.background = color;
             el.style.borderColor = borderColor;
-            if(lvl > 5) el.style.boxShadow = `0 0 ${lvl}px ${borderColor}`;
+            if(era === 2) el.style.boxShadow = `0 0 ${lvl*2}px ${borderColor}`;
         });
+        document.getElementById('main-dome').style.background = lvl >= 10 ? borderColor : '#455a64';
+    }
+
+    // --- ЛОГИКА БОЯ ---
+    function createUnit(u, isE, isB = false) {
+        const d = document.createElement('div');
+        d.className = 'unit' + (isE ? ' enemy' : '') + (u.level > 1 ? ' veteran' : '');
         
-        document.getElementById('d1').style.display = lvl >= 5 ? 'block' : 'none';
+        let char = config[u.type] || { ico: isB?'🤖':'💀', hp: 300 * profiles[activeProfileName].battleNum, dmg: 80, color: isB?'#000':'#b71c1c' };
+        if(isB) char = { ico: '🤖', hp: 30000 * profiles[activeProfileName].era, dmg: 2000, scale: 3.5, color: '#000' };
+        if(isE && profiles[activeProfileName].era === 2 && !isB) char = { ico: '👾', hp: 40000, dmg: 3000, color: '#4a148c' };
+
+        const s = char.scale || 1;
+        const xpWidth = Math.min(100, (u.xp || 0) * 10);
+
+        d.innerHTML = `
+            <div class="hp-bar"><div class="hp-fill"></div></div>
+            ${!isE ? `<div class="xp-bar"><div class="xp-fill" style="width:${xpWidth}%"></div></div>` : ''}
+            <div class="h-head"></div><div class="h-body" style="background:${char.color}"></div>
+            <div class="h-leg l"></div><div class="h-leg r"></div>
+            <div class="w-ico">${char.ico}</div>
+        `;
+        d.style.transform = `scale(${s}) ${isE ? 'scaleX(-1)' : ''}`;
+        document.getElementById('units-layer').appendChild(d);
+        
+        return { dom: d, hp: char.hp, maxHp: char.hp, data: u, x: isE ? window.innerWidth-450 : 350, y: 150+Math.random()*300, dmg: char.dmg, isB, isGeneral: char.isGeneral };
     }
 
     function startBattle() {
         let p = profiles[activeProfileName];
         if (inBattle || !p.armyInv.length) return;
-        inBattle = true;
-        document.getElementById('gate').classList.add('open');
+        inBattle = true; document.getElementById('gate').classList.add('open');
         activeP = p.armyInv.map(u => createUnit(u, false));
         
-        // Логика врагов
-        let isBossBattle = (p.battleNum % 10 === 0);
-        let eCount = p.battleNum + 2;
-        
-        for(let i=0; i<eCount; i++) {
-            let type = p.era === 1 ? 'skeleton' : 'cyborg';
-            activeE.push(createUnit({type, level: 1}, true));
-        }
-        
-        if(isBossBattle) {
-            let bossType = p.era === 1 ? 'ROBOT_BOSS' : 'DOOM_SHIP';
-            activeE.push(createUnit({type: bossType, level: 5}, true, true));
-        }
+        let isBoss = (p.battleNum % 10 === 0);
+        for(let i=0; i < p.battleNum + 2; i++) activeE.push(createUnit({type:'enemy'}, true));
+        if(isBoss) activeE.push(createUnit({type:'boss'}, true, true));
 
         const loop = setInterval(() => {
             if (!activeP.length || !activeE.length) { clearInterval(loop); endBattle(); return; }
@@ -208,101 +260,77 @@
                 if (target && u.x < target.x - 80) { u.x += 10; u.dom.classList.add('walking'); } 
                 else if(target) { 
                     u.dom.classList.remove('walking'); target.hp -= u.dmg/10; updateHP(target); 
+                    if(u.isGeneral && Math.random() > 0.92) spawnMiniDrone(u.x, u.y, target);
                     if(Math.random() > 0.95) spawnDamage(target.x, target.y, u.dmg/10);
                 }
-                u.dom.style.left = u.x + 'px'; u.dom.style.top = u.y + 'px';
+                u.dom.style.left = u.x + 'px'; u.dom.style.top = u.y + 'px'; u.dom.style.zIndex = Math.floor(u.y);
             });
 
             activeE.forEach(e => {
                 let target = activeP[0];
                 if (target && e.x > target.x + 80) { e.x -= 8; e.dom.classList.add('walking'); } 
                 else if(target) { e.dom.classList.remove('walking'); target.hp -= e.dmg/10; updateHP(target); }
-                e.dom.style.left = e.x + 'px'; e.dom.style.top = e.y + 'px';
+                e.dom.style.left = e.x + 'px'; e.dom.style.top = e.y + 'px'; e.dom.style.zIndex = Math.floor(e.y);
             });
 
             activeP = activeP.filter(u => u.hp > 0 || (u.dom.remove() && false));
             activeE = activeE.filter(e => {
                 if(e.hp <= 0) {
                     e.dom.remove();
-                    profiles[activeProfileName].money += (e.isB ? 1000 : 50) * p.era;
+                    profiles[activeProfileName].money += (e.isB ? 3000 : 50);
+                    if(e.isB) profiles[activeProfileName].bossDefeated = true;
                     activeP.forEach(pU => { 
-                        pU.data.xp = Math.min(10, pU.data.xp + 1); // ОГРАНИЧЕНИЕ XP
+                        pU.data.xp = Math.min(10, (pU.data.xp||0) + 1);
                         if(pU.dom.querySelector('.xp-fill')) pU.dom.querySelector('.xp-fill').style.width = (pU.data.xp*10)+'%';
                     });
-                    if(e.isB) profiles[activeProfileName].bossDefeated = true;
-                    return false;
+                    loadProfile(); return false;
                 }
                 return true;
             });
         }, 100);
     }
 
-    function createUnit(u, isE, isB = false) {
-        const d = document.createElement('div');
-        d.className = 'unit' + (isE ? ' enemy' : '') + (u.level > 1 ? ' veteran' : '');
-        
-        let char = config[u.type] || { ico: '💀', hp: 200 * profiles[activeProfileName].battleNum, dmg: 50, color: '#333' };
-        if(isB) char = { ico: '🤖', hp: 15000 * profiles[activeProfileName].era, dmg: 1000, scale: 3 };
-        
-        const s = char.scale || 1;
-        d.innerHTML = `
-            <div class="hp-bar"><div class="hp-fill"></div></div>
-            ${!isE ? `<div class="xp-bar"><div class="xp-fill" style="width:${(u.xp/10)*100}%"></div></div>` : ''}
-            <div class="h-head"></div><div class="h-body" style="background:${char.color}"></div>
-            <div class="h-leg l" style="left:10px"></div><div class="h-leg r" style="left:24px"></div>
-            <div class="w-ico">${char.ico}</div>
-        `;
-        d.style.transform = `scale(${s}) ${isE ? 'scaleX(-1)' : ''}`;
+    function spawnMiniDrone(x, y, target) {
+        const d = document.createElement('div'); d.className = 'drone-mini';
+        d.style.left = x + 'px'; d.style.top = y + 'px';
         document.getElementById('units-layer').appendChild(d);
-        
-        return { dom: d, hp: char.hp, maxHp: char.hp, data: u, x: isE ? window.innerWidth-400 : 350, y: 150+Math.random()*300, dmg: char.dmg, isB };
-    }
-
-    function checkEraTransfer() {
-        let p = profiles[activeProfileName];
-        if(p.bossDefeated) {
-            p.era = 2; p.money += 10000;
-            addLog("ВЫ ПЕРЕШЛИ В ЭПОХУ МОДЕРНА!");
-            loadProfile();
-        } else {
-            alert("Нужно победить Босса-Робота на 10-м бою!");
-        }
+        setTimeout(() => { if(target) target.hp -= 1000; d.remove(); }, 400);
     }
 
     function endBattle() {
-        inBattle = false;
-        document.getElementById('gate').classList.remove('open');
+        inBattle = false; document.getElementById('gate').classList.remove('open');
         let p = profiles[activeProfileName];
-        if(activeP.length > 0) {
-            p.battleNum++;
-            addLog("ПОБЕДА! Бой №" + p.battleNum);
-        }
+        if(activeP.length > 0) { p.battleNum++; addLog("ПОБЕДА! Бой №" + p.battleNum); playSnd(1200, 'sine', 0.5, 0.2); }
+        else { addLog("ПОРАЖЕНИЕ..."); playSnd(150, 'sawtooth', 0.5, 0.2); }
+        
         p.armyInv = activeP.map(u => {
-            if(u.data.xp >= 10) { u.data.level++; u.data.xp = 0; }
+            if(u.data.xp >= 10) { u.data.level++; u.data.xp = 0; addLog("Юнит стал ВЕТЕРАНОМ!"); }
             return u.data;
         });
+        
         activeP.forEach(u => u.dom.remove()); activeE.forEach(e => e.dom.remove());
         activeP = []; activeE = []; save(); loadProfile();
     }
 
-    // Вспомогательные функции
+    // --- ВСПОМОГАТЕЛЬНОЕ ---
     function updateHP(u) { if(u.dom) u.dom.querySelector('.hp-fill').style.width = (u.hp/u.maxHp*100)+'%'; }
     function spawnDamage(x, y, d) {
-        const p = document.createElement('div'); p.style.cssText = `position:absolute; left:${x}px; top:${y}px; color:red; font-weight:bold; animation: damagePop 0.8s forwards;`;
+        const p = document.createElement('div'); p.style.cssText = `position:absolute; left:${x}px; top:${y}px; color:red; font-weight:bold; animation: damagePop 0.8s forwards; z-index:5000;`;
         p.innerText = "-" + Math.floor(d); document.getElementById('field').appendChild(p); setTimeout(() => p.remove(), 800);
     }
-    function addMoney() { profiles[activeProfileName].money += (profiles[activeProfileName].lvl * 10); loadProfile(); }
+    function addMoney() { profiles[activeProfileName].money += (profiles[activeProfileName].lvl * 15); playSnd(900, 'sine', 0.1, 0.1); loadProfile(); }
     function upgrade() { 
         let p = profiles[activeProfileName]; 
-        if(p.money >= p.upCost && p.lvl < 10) { p.money -= p.upCost; p.lvl++; p.upCost *= 2; save(); loadProfile(); } 
+        if(p.money >= p.upCost && p.lvl < 10) { p.money -= p.upCost; p.lvl++; p.upCost *= 2; playSnd(500, 'triangle', 0.5, 0.2); save(); loadProfile(); } 
     }
     function buy(t) { 
         let p = profiles[activeProfileName]; 
-        if(p.money >= config[t].cost) { p.money -= config[t].cost; p.armyInv.push({type:t, level:1, xp:0}); save(); loadProfile(); } 
+        if(p.money >= config[t].cost) { p.money -= config[t].cost; p.armyInv.push({type:t, level:1, xp:0}); playSnd(1000, 'sine', 0.1, 0.1); save(); loadProfile(); } 
     }
-    function createNewProfile() {
-        const n = prompt("Имя:");
-        if(n) { createProfile(n); activeProfileName = n; renderProfiles(); loadProfile(); }
+    function checkEraTransfer() {
+        let p = profiles[activeProfileName];
+        if(p.bossDefeated) { p.era = 2; p.money += 20000; addLog("ЭВОЛЮЦИЯ ДО ЭПОХИ МОДЕРНА!"); loadProfile(); save(); }
+        else alert("Сначала победи БОССА-РОБОТА на 10-м бою!");
     }
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles)); }
 
@@ -310,4 +338,3 @@
 </script>
 </body>
 </html>
-
