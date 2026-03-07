@@ -2,216 +2,181 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Цитадель: Мини игра 2 (Максимальная версия)</title>
+    <title>Цитадель: Эпоха Дронов</title>
     <style>
-        @keyframes damagePop { 
-            0% { transform: translateY(0); opacity: 1; } 
-            100% { transform: translateY(-50px); opacity: 0; } 
-        }
-        @keyframes gradient-anim {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes glow { from { opacity: 0.5; } to { opacity: 1; } }
-        @keyframes step { from { transform: rotate(-25deg); } to { transform: rotate(25deg); } }
-        @keyframes fall { to { transform: translateY(100vh) translateX(-40px); } }
-
-        :root {
-            --gold: #ffc107; --stone: #607d8b; --stone-drk: #263238;
-            --wood: #4e342e; --skin: #ffccbc;
-        }
-        body { margin: 0; background: #1b5e20; font-family: 'Segoe UI', Tahoma, sans-serif; color: white; overflow: hidden; }
+        @keyframes damagePop { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-50px); opacity: 0; } }
+        @keyframes step { from { transform: rotate(-20deg); } to { transform: rotate(20deg); } }
+        @keyframes fly { 0% { transform: translateY(0); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0); } }
+        
+        :root { --gold: #ffc107; --stone: #607d8b; --stone-drk: #263238; --skin: #ffccbc; --neon: #00f2ff; }
+        body { margin: 0; background: #1b5e20; font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
 
         /* ИНТЕРФЕЙС */
-        #ui { position: absolute; left: 0; top: 0; width: 320px; height: 100vh; background: #111; 
-              padding: 20px; border-right: 5px solid var(--gold); z-index: 1000; box-shadow: 10px 0 20px rgba(0,0,0,0.8); box-sizing: border-box;}
-        .stat { font-size: 22px; margin-bottom: 10px; color: var(--gold); font-weight: bold; }
-        .army-box { background: #222; padding: 10px; border-radius: 8px; margin: 15px 0; border: 1px solid #444; font-size: 12px; min-height: 40px;}
+        #ui { position: absolute; left: 0; top: 0; width: 320px; height: 100vh; background: #111; padding: 15px; border-right: 4px solid var(--gold); z-index: 1000; box-sizing: border-box; overflow-y: auto;}
+        .stat { font-size: 18px; margin-bottom: 5px; color: var(--gold); font-weight: bold; }
+        .era-tag { background: var(--gold); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-bottom: 10px; display: inline-block; }
         
         .btn-grad {
-            width: 100%; padding: 12px; margin: 4px 0;
-            background: linear-gradient(-45deg, #3e2723, #5d4037, #8d6e63, #3e2723);
-            background-size: 400% 400%; animation: gradient-anim 5s ease infinite;
-            border: 2px solid var(--gold); color: white; cursor: pointer; border-radius: 6px;
-            font-weight: bold; transition: 0.3s; text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            width: 100%; padding: 10px; margin: 3px 0; font-size: 11px;
+            background: linear-gradient(-45deg, #3e2723, #5d4037, #3e2723);
+            border: 1px solid var(--gold); color: white; cursor: pointer; border-radius: 4px; font-weight: bold; text-transform: uppercase;
         }
-        .btn-grad:hover { transform: translateY(-2px); filter: brightness(1.2); }
-        .btn-grad:disabled { opacity: 0.3; cursor: not-allowed; animation: none; }
-        #battle-btn { background: linear-gradient(-45deg, #b71c1c, #d32f2f, #f44336, #b71c1c); background-size: 400% 400%; font-size: 18px; margin-top: 15px; }
+        .btn-grad:disabled { opacity: 0.3; cursor: not-allowed; }
+        #battle-btn { background: linear-gradient(to bottom, #f44336, #b71c1c); font-size: 16px; margin-top: 10px; height: 50px; }
 
         /* ПРОФИЛИ */
-        #profile-bar {
-            position: absolute; top: 10px; left: 340px; display: flex; gap: 8px; z-index: 2000;
-            background: rgba(0,0,0,0.5); padding: 5px; border-radius: 10px;
-        }
-        .profile-btn {
-            padding: 5px 12px; background: #333; border: 1px solid var(--gold); color: #fff;
-            cursor: pointer; border-radius: 4px; font-size: 12px;
-        }
-        .profile-btn.active { background: var(--gold); color: #000; font-weight: bold; }
+        #profile-bar { position: absolute; top: 10px; left: 330px; display: flex; gap: 5px; z-index: 2000; }
+        .profile-btn { padding: 4px 10px; background: #222; border: 1px solid var(--gold); color: #fff; cursor: pointer; font-size: 11px; }
+        .profile-btn.active { background: var(--gold); color: #000; }
 
-        /* ДВОРЕЦ */
-        #castle-wrap { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 280px; height: 450px; z-index: 100; }
-        .palace-base { position: absolute; bottom: 0; width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
-        .tower { background: linear-gradient(to right, var(--stone), var(--stone-drk)); border: 3px solid #111; position: relative; }
-        .t-side { width: 60px; height: 65%; border-radius: 5px 5px 0 0; }
-        .t-main { width: 160px; height: 95%; margin: 0 -5px; z-index: 2; border-radius: 10px 10px 0 0; }
-        .dome { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 100px; height: 50px; background: #455a64; border-radius: 50% 50% 0 0; border: 2px solid #111; }
-        #gate { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 80px; height: 100px; background: #3e2723; border: 3px solid var(--gold); border-radius: 40px 40px 0 0; transition: 1s; z-index: 10; }
+        /* КРЕПОСТЬ */
+        #castle-wrap { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 250px; height: 400px; display: flex; align-items: flex-end; justify-content: center; gap: 2px; }
+        .tower { background: linear-gradient(to right, var(--stone), var(--stone-drk)); border: 2px solid #111; transition: 0.5s; position: relative; }
+        .t-side { width: 50px; height: 40%; }
+        .t-main { width: 120px; height: 70%; z-index: 2; }
+        .dome { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); width: 80px; height: 40px; background: #455a64; border-radius: 40px 40px 0 0; border: 2px solid #111; }
+        #gate { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 60px; height: 70px; background: #3e2723; border: 2px solid var(--gold); border-radius: 30px 30px 0 0; transition: 1s; }
         #gate.open { transform: translateX(-50%) scaleY(0.1); transform-origin: bottom; }
+        .decor { position: absolute; background: var(--gold); width: 100%; height: 5px; top: 20%; display: none; }
 
         /* ЮНИТЫ */
-        .unit { position: absolute; width: 50px; height: 80px; transition: left 0.1s linear, top 0.1s linear; z-index: 200; }
-        .h-head { width: 16px; height: 16px; background: var(--skin); border-radius: 50%; position: absolute; top: 0; left: 17px; border: 1.5px solid #000; }
-        .h-body { width: 22px; height: 30px; border: 1.5px solid #000; position: absolute; top: 16px; left: 14px; border-radius: 4px; }
-        .h-leg { width: 8px; height: 25px; background: #222; position: absolute; top: 46px; border-radius: 2px; transform-origin: top; }
-        .l { left: 14px; } .r { left: 28px; }
-        .w-ico { position: absolute; font-size: 24px; top: 10px; right: -15px; filter: drop-shadow(0 0 3px white); }
+        #field { position: absolute; left: 320px; top: 0; right: 0; bottom: 0; background: radial-gradient(circle, #2e7d32, #1b5e20); overflow: hidden; }
+        .unit { position: absolute; width: 40px; height: 60px; z-index: 100; }
+        .h-body { width: 20px; height: 25px; border: 1.5px solid #000; position: absolute; top: 15px; left: 10px; border-radius: 3px; }
+        .h-head { width: 14px; height: 14px; background: var(--skin); border-radius: 50%; position: absolute; top: 2px; left: 13px; border: 1.5px solid #000; }
+        .h-leg { width: 6px; height: 18px; background: #222; position: absolute; top: 40px; }
         .walking .l { animation: step 0.3s infinite alternate; }
         .walking .r { animation: step 0.3s infinite alternate-reverse; }
-
-        .hp-bar { position: absolute; top: -15px; width: 100%; height: 5px; background: #000; border: 1px solid #fff; }
-        .hp-fill { height: 100%; background: #4caf50; width: 100%; transition: 0.1s; }
-        .xp-bar { position: absolute; top: -22px; width: 100%; height: 3px; background: rgba(0,0,0,0.5); border: 1px solid #fff; }
-        .xp-fill { height: 100%; background: #2196f3; width: 0%; transition: 0.3s; }
-        .veteran::before { content: '⭐'; position: absolute; top: -40px; left: 18px; color: gold; font-size: 16px; animation: glow 1s infinite alternate; }
-
-        #field { position: absolute; left: 320px; top: 0; right: 0; bottom: 0; background: radial-gradient(circle, #2e7d32, #1b5e20); overflow: hidden; }
-        .rain { position: absolute; width: 2px; height: 20px; background: rgba(255,255,255,0.2); animation: fall 0.8s linear infinite; z-index: 500; pointer-events: none; }
-        #log { position: absolute; bottom: 20px; right: 20px; width: 350px; height: 120px; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 15px; font-size: 13px; border-radius: 10px; overflow-y: auto; color: white; z-index: 3000; }
+        
+        .hp-bar { position: absolute; top: -12px; width: 100%; height: 4px; background: #000; border: 1px solid #fff; }
+        .hp-fill { height: 100%; background: #4caf50; width: 100%; }
+        .xp-bar { position: absolute; top: -18px; width: 100%; height: 3px; background: #111; border: 1px solid #fff; }
+        .xp-fill { height: 100%; background: #2196f3; width: 0%; max-width: 100%; }
+        
+        .drone { width: 15px; height: 10px; background: #00f2ff; border-radius: 50%; animation: fly 0.5s infinite; }
+        #log { position: absolute; bottom: 15px; right: 15px; width: 300px; height: 100px; background: rgba(0,0,0,0.8); border: 2px solid var(--gold); padding: 10px; font-size: 11px; overflow-y: auto; z-index: 2000; }
     </style>
 </head>
 <body>
 
 <div id="profile-bar">
     <div id="profile-list" style="display:flex; gap:5px;"></div>
-    <button class="profile-btn" onclick="createNewProfile()" style="background:#2e7d32; border-color:#fff;">[+] НОВЫЙ</button>
+    <button class="profile-btn" onclick="createNewProfile()" style="background:#2e7d32; border-color:#fff;">+ НОВЫЙ</button>
 </div>
 
 <div id="ui">
+    <div id="era-display" class="era-tag">ЭПОХА: СРЕДНЕВЕКОВЬЕ</div>
     <div class="stat">💰 ЗОЛОТО: <span id="money">0</span></div>
     <div class="stat">🏰 ДВОРЕЦ: <span id="lvl">1</span>/10</div>
+    <div class="stat">⚔️ БОЙ: <span id="battleNum">1</span></div>
+    
     <button class="btn-grad" onclick="addMoney()">💎 СОБРАТЬ НАЛОГИ</button>
     <button class="btn-grad" id="upBtn" onclick="upgrade()">🏛️ УЛУЧШИТЬ ДВОРЕЦ (<span id="upCost">50</span>)</button>
     <hr>
-    <div class="army-box">КАЗАРМЫ: <span id="armyCount">0</span> ВОИНОВ</div>
-    <button class="btn-grad" onclick="buy('sword')">⚔️ Мечник (5)</button>
-    <button class="btn-grad" onclick="buy('mace')">🔨 Булавоносец (25)</button>
-    <button class="btn-grad" onclick="buy('rider')">🏇 Всадник (50)</button>
-    <button class="btn-grad" onclick="buy('cannon')">💣 Пушкарь (100)</button>
-    <button class="btn-grad" onclick="buy('giant')">👹 ГИГАНТ (250)</button>
-    <button class="btn-grad" onclick="buy('iron_guard')" style="border-color: #90a4ae;">🛡️ Жел. Страж (1000)</button>
-    <button class="btn-grad" onclick="buy('armored_car')" style="border-color: #607d8b;">🚜 БРОНЕВИК (2500)</button>
+    
+    <div id="shop-era-1">
+        <button class="btn-grad" onclick="buy('sword')">⚔️ Мечник (5)</button>
+        <button class="btn-grad" onclick="buy('mace')">🔨 Булавоносец (25)</button>
+        <button class="btn-grad" onclick="buy('rider')">🏇 Всадник (50)</button>
+        <button class="btn-grad" onclick="buy('cannon')">💣 Пушкарь (100)</button>
+        <button class="btn-grad" onclick="buy('giant')">👹 Гигант (250)</button>
+        <button class="btn-grad" onclick="buy('iron_guard')">🛡️ Страж (1000)</button>
+        <button class="btn-grad" onclick="buy('armored_car')">🚜 Броневик (2500)</button>
+    </div>
+
+    <div id="shop-era-2" style="display:none;">
+        <button class="btn-grad" onclick="buy('soldier')" style="border-color:var(--neon)">🔫 Автоматчик (5k)</button>
+        <button class="btn-grad" onclick="buy('heavy')" style="border-color:var(--neon)">🔥 Миниганер (10k)</button>
+        <button class="btn-grad" onclick="buy('tank')" style="border-color:var(--neon)">📟 Танк T-90 (25k)</button>
+        <button class="btn-grad" onclick="buy('jet')" style="border-color:var(--neon)">✈️ Истребитель (50k)</button>
+        <button class="btn-grad" onclick="buy('general')" style="border-color:var(--neon)">🎖️ Генерал Дронов (100k)</button>
+    </div>
 
     <button class="btn-grad" id="battle-btn" onclick="startBattle()">⚔️ В БОЙ!</button>
-    <button class="btn-grad" onclick="deleteCurrentProfile()" style="background: #333; font-size:10px; margin-top:20px; border-color: red;">УДАЛИТЬ ПРОФИЛЬ</button>
+    <button id="nextEraBtn" class="btn-grad" onclick="checkEraTransfer()" style="display:none; background:var(--gold); color:#000;">➡️ СЛЕДУЮЩАЯ ЭРА</button>
 </div>
 
 <div id="field">
     <div id="castle-wrap">
-        <div class="palace-base">
-            <div class="tower t-side"></div>
-            <div class="tower t-main"><div id="main-dome" class="dome"></div><div id="gate"></div></div>
-            <div class="tower t-side"></div>
+        <div class="tower t-side" id="ts1"></div>
+        <div class="tower t-main" id="tm">
+            <div id="main-dome" class="dome"></div>
+            <div id="gate"></div>
+            <div class="decor" id="d1"></div>
         </div>
+        <div class="tower t-side" id="ts2"></div>
     </div>
     <div id="units-layer"></div>
-    <div id="log">Система: Наймите войска и в путь!</div>
+    <div id="log">Система: Развивайте крепость!</div>
 </div>
 
 <script>
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playSnd(f, t, d, v) {
-        try {
-            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-            o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-            g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+d);
-            o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d);
-        } catch(e){}
-    }
-
     const config = {
+        // ERA 1
         sword: { ico: '⚔️', cost: 5, hp: 100, dmg: 35, color: '#1565c0' },
         mace: { ico: '🔨', cost: 25, hp: 130, dmg: 50, color: '#6d4c41' },
         rider: { ico: '🏇', cost: 50, hp: 160, dmg: 70, color: '#1e88e5' },
         cannon: { ico: '💣', cost: 100, hp: 100, dmg: 200, color: '#424242' },
-        giant: { ico: '👹', cost: 250, hp: 900, dmg: 300, color: '#1b5e20', scale: 1.6 },
-        iron_guard: { ico: '🛡️', cost: 1000, hp: 3000, dmg: 150, color: '#455a64', scale: 1.8 },
-        armored_car: { ico: '🚜', cost: 2500, hp: 12000, dmg: 500, color: '#37474f', scale: 2.2 }
+        giant: { ico: '👹', cost: 250, hp: 1000, dmg: 350, color: '#1b5e20', scale: 1.6 },
+        iron_guard: { ico: '🛡️', cost: 1000, hp: 4000, dmg: 180, color: '#455a64', scale: 1.8 },
+        armored_car: { ico: '🚜', cost: 2500, hp: 12000, dmg: 500, color: '#37474f', scale: 2.2 },
+        // ERA 2
+        soldier: { ico: '🔫', cost: 5000, hp: 15000, dmg: 1200, color: '#2e7d32', era: 2 },
+        heavy: { ico: '🔥', cost: 10000, hp: 30000, dmg: 3000, color: '#c62828', era: 2, scale: 1.3 },
+        tank: { ico: '📟', cost: 25000, hp: 80000, dmg: 8000, color: '#1b5e20', era: 2, scale: 2.5 },
+        jet: { ico: '✈️', cost: 50000, hp: 50000, dmg: 15000, color: '#37474f', era: 2, isFly: true, scale: 2.5 },
+        general: { ico: '🎖️', cost: 100000, hp: 100000, dmg: 20000, color: '#1a237e', era: 2, isGeneral: true }
     };
 
-    let activeProfileName = "Крепость", profiles = {}, inBattle = false, activeP = [], activeE = [];
-    const STORAGE_KEY = 'citadel_profiles_v6';
+    let activeProfileName = "", profiles = {}, inBattle = false, activeP = [], activeE = [];
+    const STORAGE_KEY = 'citadel_v7';
 
-    function initStorage() {
+    function init() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if(saved) profiles = JSON.parse(saved);
-        if(!Object.keys(profiles).length) profiles["Крепость"] = { money: 100, lvl: 1, upCost: 50, armyInv: [] };
+        if(!Object.keys(profiles).length) createProfile("Лорд");
         activeProfileName = Object.keys(profiles)[0];
-        renderProfiles(); loadActiveProfile();
+        renderProfiles(); loadProfile();
     }
 
-    function saveAll() { localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles)); }
-
-    function renderProfiles() {
-        const list = document.getElementById('profile-list'); list.innerHTML = "";
-        Object.keys(profiles).forEach(name => {
-            const btn = document.createElement('button');
-            btn.className = `profile-btn ${name === activeProfileName ? 'active' : ''}`;
-            btn.innerText = name; btn.onclick = () => { if(!inBattle) { activeProfileName = name; renderProfiles(); loadActiveProfile(); } };
-            list.appendChild(btn);
-        });
+    function createProfile(name) {
+        profiles[name] = { money: 100, lvl: 1, upCost: 50, armyInv: [], battleNum: 1, era: 1, bossDefeated: false };
     }
 
-    function loadActiveProfile() {
+    function loadProfile() {
         const p = profiles[activeProfileName];
         document.getElementById('money').innerText = p.money;
         document.getElementById('lvl').innerText = p.lvl;
         document.getElementById('upCost').innerText = p.upCost;
-        document.getElementById('armyCount').innerText = p.armyInv.length;
-        document.getElementById('main-dome').style.background = p.lvl >= 10 ? 'var(--gold)' : (p.lvl >= 5 ? '#78909c' : '#455a64');
-        document.getElementById('upBtn').disabled = (p.money < p.upCost || p.lvl >= 10);
+        document.getElementById('battleNum').innerText = p.battleNum;
+        document.getElementById('era-display').innerText = `ЭПОХА: ${p.era === 1 ? 'СРЕДНЕВЕКОВЬЕ' : 'СОВРЕМЕННОСТЬ'}`;
+        
+        document.getElementById('shop-era-1').style.display = p.era === 1 ? 'block' : 'none';
+        document.getElementById('shop-era-2').style.display = p.era === 2 ? 'block' : 'none';
+        
+        // Показываем кнопку перехода, если условия выполнены
+        const hasAll = ['sword','mace','rider','cannon','giant','iron_guard','armored_car'].every(type => p.armyInv.some(u => u.type === type));
+        document.getElementById('nextEraBtn').style.display = (p.era === 1 && p.lvl >= 10 && hasAll) ? 'block' : 'none';
+        
+        updateCastleGraphics(p.lvl, p.era);
     }
 
-    function addLog(m) { const l = document.getElementById('log'); l.innerHTML = `> ${m}<br>${l.innerHTML}`; }
-    function addMoney() { profiles[activeProfileName].money += (profiles[activeProfileName].lvl * 5); playSnd(900, 'sine', 0.1, 0.1); saveAll(); loadActiveProfile(); }
-    
-    function upgrade() {
-        let p = profiles[activeProfileName];
-        if (p.money >= p.upCost && p.lvl < 10) { p.money -= p.upCost; p.lvl++; p.upCost += 50; playSnd(500, 'triangle', 0.5, 0.2); saveAll(); loadActiveProfile(); }
-    }
-
-    function buy(type) {
-        let p = profiles[activeProfileName];
-        if (p.money >= config[type].cost) { p.money -= config[type].cost; p.armyInv.push({ type, level: 1, xp: 0 }); playSnd(1000, 'sine', 0.1, 0.1); saveAll(); loadActiveProfile(); }
-    }
-
-    function createUnit(u, isE, isB = false) {
-        const d = document.createElement('div');
-        d.className = 'unit walking' + (isE ? ' enemy' : '') + (u.level > 1 ? ' veteran' : '');
-        const c = isE ? (isB ? '#000' : '#b71c1c') : config[u.type].color;
-        const s = isB ? 2.5 : (config[u.type].scale || 1);
+    function updateCastleGraphics(lvl, era) {
+        const ts1 = document.getElementById('ts1'), ts2 = document.getElementById('ts2'), tm = document.getElementById('tm');
+        const color = era === 2 ? '#37474f' : '#607d8b';
+        const borderColor = era === 2 ? '#00f2ff' : '#ffc107';
         
-        const xpBarHtml = !isE ? `<div class="xp-bar"><div class="xp-fill" style="width:${(u.xp/10)*100}%"></div></div>` : '';
-
-        // ПОЛНАЯ ОТРИСОВКА ИЗ ТВОИХ ИСХОДНИКОВ
-        d.innerHTML = `
-            <div class="hp-bar"><div class="hp-fill"></div></div>
-            ${xpBarHtml}
-            <div class="h-head"></div>
-            <div class="h-body" style="background:${c}"></div>
-            <div class="h-leg l"></div>
-            <div class="h-leg r"></div>
-            <div class="w-ico">${isE ? (isB?'🐉':'💀') : config[u.type].ico}</div>
-        `;
+        ts1.style.height = (30 + lvl * 4) + '%';
+        ts2.style.height = (30 + lvl * 4) + '%';
+        tm.style.height = (60 + lvl * 3) + '%';
         
-        d.style.transform = `scale(${s}) ${isE ? 'scaleX(-1)' : ''}`;
-        document.getElementById('units-layer').appendChild(d);
+        [ts1, ts2, tm].forEach(el => {
+            el.style.background = color;
+            el.style.borderColor = borderColor;
+            if(lvl > 5) el.style.boxShadow = `0 0 ${lvl}px ${borderColor}`;
+        });
         
-        let hpVal = isE ? (isB ? 4000 : 150) : (config[u.type].hp * (1 + u.level * 0.2));
-        return { dom: d, hp: hpVal, maxHp: hpVal, data: u, isE, isB, x: isE ? (window.innerWidth - 450) : 320, y: 100 + Math.random() * (window.innerHeight - 250), dmg: isE ? (isB ? 150 : 25) : (config[u.type].dmg * (1 + u.level * 0.2)) };
+        document.getElementById('d1').style.display = lvl >= 5 ? 'block' : 'none';
     }
 
     function startBattle() {
@@ -220,75 +185,128 @@
         inBattle = true;
         document.getElementById('gate').classList.add('open');
         activeP = p.armyInv.map(u => createUnit(u, false));
-        for(let i=0; i < p.armyInv.length + 2; i++) activeE.push(createUnit({type:'sword', level:1}, true));
-        if(Math.random() > 0.7) activeE.push(createUnit({type:'sword', level:1}, true, true));
+        
+        // Логика врагов
+        let isBossBattle = (p.battleNum % 10 === 0);
+        let eCount = p.battleNum + 2;
+        
+        for(let i=0; i<eCount; i++) {
+            let type = p.era === 1 ? 'skeleton' : 'cyborg';
+            activeE.push(createUnit({type, level: 1}, true));
+        }
+        
+        if(isBossBattle) {
+            let bossType = p.era === 1 ? 'ROBOT_BOSS' : 'DOOM_SHIP';
+            activeE.push(createUnit({type: bossType, level: 5}, true, true));
+        }
 
         const loop = setInterval(() => {
             if (!activeP.length || !activeE.length) { clearInterval(loop); endBattle(); return; }
-            
+
             activeP.forEach(u => {
                 let target = activeE[0];
-                if (target && u.x < target.x - 70) { u.x += 10; u.dom.classList.add('walking'); } 
+                if (target && u.x < target.x - 80) { u.x += 10; u.dom.classList.add('walking'); } 
                 else if(target) { 
-                    u.dom.classList.remove('walking'); target.hp -= u.dmg / 10; updateHP(target); 
-                    if(Math.random() > 0.9) spawnDamage(target.x, target.y, u.dmg/10);
+                    u.dom.classList.remove('walking'); target.hp -= u.dmg/10; updateHP(target); 
+                    if(Math.random() > 0.95) spawnDamage(target.x, target.y, u.dmg/10);
                 }
-                u.dom.style.left = u.x + 'px'; u.dom.style.top = u.y + 'px'; u.dom.style.zIndex = Math.floor(u.y);
+                u.dom.style.left = u.x + 'px'; u.dom.style.top = u.y + 'px';
             });
 
             activeE.forEach(e => {
                 let target = activeP[0];
-                if (target && e.x > target.x + 70) { e.x -= 8; e.dom.classList.add('walking'); } 
-                else if(target) { e.dom.classList.remove('walking'); target.hp -= e.dmg / 10; updateHP(target); }
-                e.dom.style.left = e.x + 'px'; e.dom.style.top = e.y + 'px'; e.dom.style.zIndex = Math.floor(e.y);
+                if (target && e.x > target.x + 80) { e.x -= 8; e.dom.classList.add('walking'); } 
+                else if(target) { e.dom.classList.remove('walking'); target.hp -= e.dmg/10; updateHP(target); }
+                e.dom.style.left = e.x + 'px'; e.dom.style.top = e.y + 'px';
             });
 
-            activeP = activeP.filter(u => { if(u.hp <= 0) { u.dom.remove(); return false; } return true; });
-            activeE = activeE.filter(e => { 
-                if(e.hp <= 0) { 
-                    e.dom.remove(); profiles[activeProfileName].money += e.isB ? 500 : 30; 
+            activeP = activeP.filter(u => u.hp > 0 || (u.dom.remove() && false));
+            activeE = activeE.filter(e => {
+                if(e.hp <= 0) {
+                    e.dom.remove();
+                    profiles[activeProfileName].money += (e.isB ? 1000 : 50) * p.era;
                     activeP.forEach(pU => { 
-                        pU.data.xp++; 
-                        const fill = pU.dom.querySelector('.xp-fill');
-                        if(fill) fill.style.width = (pU.data.xp / 10 * 100) + '%';
+                        pU.data.xp = Math.min(10, pU.data.xp + 1); // ОГРАНИЧЕНИЕ XP
+                        if(pU.dom.querySelector('.xp-fill')) pU.dom.querySelector('.xp-fill').style.width = (pU.data.xp*10)+'%';
                     });
-                    loadActiveProfile(); return false; 
-                } return true; 
+                    if(e.isB) profiles[activeProfileName].bossDefeated = true;
+                    return false;
+                }
+                return true;
             });
         }, 100);
     }
 
-    function updateHP(u) { if(u.dom) u.dom.querySelector('.hp-fill').style.width = Math.max(0, (u.hp/u.maxHp*100)) + '%'; }
-    function spawnDamage(x, y, d) {
-        const p = document.createElement('div'); p.style.cssText = `position:absolute; left:${x}px; top:${y}px; color:#ff5252; font-weight:bold; z-index:5000; animation: damagePop 0.8s forwards;`;
-        p.innerText = "-" + Math.floor(d); document.getElementById('field').appendChild(p); setTimeout(() => p.remove(), 800);
+    function createUnit(u, isE, isB = false) {
+        const d = document.createElement('div');
+        d.className = 'unit' + (isE ? ' enemy' : '') + (u.level > 1 ? ' veteran' : '');
+        
+        let char = config[u.type] || { ico: '💀', hp: 200 * profiles[activeProfileName].battleNum, dmg: 50, color: '#333' };
+        if(isB) char = { ico: '🤖', hp: 15000 * profiles[activeProfileName].era, dmg: 1000, scale: 3 };
+        
+        const s = char.scale || 1;
+        d.innerHTML = `
+            <div class="hp-bar"><div class="hp-fill"></div></div>
+            ${!isE ? `<div class="xp-bar"><div class="xp-fill" style="width:${(u.xp/10)*100}%"></div></div>` : ''}
+            <div class="h-head"></div><div class="h-body" style="background:${char.color}"></div>
+            <div class="h-leg l" style="left:10px"></div><div class="h-leg r" style="left:24px"></div>
+            <div class="w-ico">${char.ico}</div>
+        `;
+        d.style.transform = `scale(${s}) ${isE ? 'scaleX(-1)' : ''}`;
+        document.getElementById('units-layer').appendChild(d);
+        
+        return { dom: d, hp: char.hp, maxHp: char.hp, data: u, x: isE ? window.innerWidth-400 : 350, y: 150+Math.random()*300, dmg: char.dmg, isB };
+    }
+
+    function checkEraTransfer() {
+        let p = profiles[activeProfileName];
+        if(p.bossDefeated) {
+            p.era = 2; p.money += 10000;
+            addLog("ВЫ ПЕРЕШЛИ В ЭПОХУ МОДЕРНА!");
+            loadProfile();
+        } else {
+            alert("Нужно победить Босса-Робота на 10-м бою!");
+        }
     }
 
     function endBattle() {
-        inBattle = false; document.getElementById('gate').classList.remove('open');
-        addLog(activeP.length ? "ПОБЕДА!" : "ПОРАЖЕНИЕ...");
-        profiles[activeProfileName].armyInv = activeP.map(u => {
-            if(u.data.xp >= 10) { u.data.level++; u.data.xp = 0; addLog("Юнит стал ветераном!"); playSnd(1200, 'sine', 0.5, 0.2); }
+        inBattle = false;
+        document.getElementById('gate').classList.remove('open');
+        let p = profiles[activeProfileName];
+        if(activeP.length > 0) {
+            p.battleNum++;
+            addLog("ПОБЕДА! Бой №" + p.battleNum);
+        }
+        p.armyInv = activeP.map(u => {
+            if(u.data.xp >= 10) { u.data.level++; u.data.xp = 0; }
             return u.data;
         });
         activeP.forEach(u => u.dom.remove()); activeE.forEach(e => e.dom.remove());
-        activeP = []; activeE = []; saveAll(); loadActiveProfile();
+        activeP = []; activeE = []; save(); loadProfile();
     }
 
+    // Вспомогательные функции
+    function updateHP(u) { if(u.dom) u.dom.querySelector('.hp-fill').style.width = (u.hp/u.maxHp*100)+'%'; }
+    function spawnDamage(x, y, d) {
+        const p = document.createElement('div'); p.style.cssText = `position:absolute; left:${x}px; top:${y}px; color:red; font-weight:bold; animation: damagePop 0.8s forwards;`;
+        p.innerText = "-" + Math.floor(d); document.getElementById('field').appendChild(p); setTimeout(() => p.remove(), 800);
+    }
+    function addMoney() { profiles[activeProfileName].money += (profiles[activeProfileName].lvl * 10); loadProfile(); }
+    function upgrade() { 
+        let p = profiles[activeProfileName]; 
+        if(p.money >= p.upCost && p.lvl < 10) { p.money -= p.upCost; p.lvl++; p.upCost *= 2; save(); loadProfile(); } 
+    }
+    function buy(t) { 
+        let p = profiles[activeProfileName]; 
+        if(p.money >= config[t].cost) { p.money -= config[t].cost; p.armyInv.push({type:t, level:1, xp:0}); save(); loadProfile(); } 
+    }
     function createNewProfile() {
         const n = prompt("Имя:");
-        if (n && !profiles[n]) { profiles[n] = { money: 100, lvl: 1, upCost: 50, armyInv: [] }; activeProfileName = n; saveAll(); renderProfiles(); loadActiveProfile(); }
+        if(n) { createProfile(n); activeProfileName = n; renderProfiles(); loadProfile(); }
     }
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles)); }
 
-    function deleteCurrentProfile() {
-        if (Object.keys(profiles).length <= 1) return alert("Последний нельзя!");
-        if (confirm("Удалить?")) { delete profiles[activeProfileName]; activeProfileName = Object.keys(profiles)[0]; saveAll(); renderProfiles(); loadActiveProfile(); }
-    }
-
-    for(let i=0; i<40; i++) {
-        let r = document.createElement('div'); r.className = 'rain'; r.style.left = Math.random() * 100 + '%'; r.style.animationDelay = Math.random() * 2 + 's'; document.body.appendChild(r);
-    }
-    initStorage();
+    init();
 </script>
 </body>
 </html>
