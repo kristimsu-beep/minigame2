@@ -76,6 +76,35 @@
 
         .drone-mini { position: absolute; width: 12px; height: 8px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 8px var(--neon); z-index: 500; }
         #log { position: absolute; bottom: 20px; right: 20px; width: 350px; height: 120px; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 15px; font-size: 13px; border-radius: 10px; overflow-y: auto; color: white; z-index: 3000; }
+        .meteor {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ffeb3b, #f44336, #212121);
+            border-radius: 50%;
+            box-shadow: 0 0 20px #ff5722, 0 0 50px #ffc107;
+            pointer-events: none;
+            z-index: 6000;
+            transition: transform 0.5s linear, opacity 0.2s;
+        }
+        .meteor::after { /* Хвост метеорита */
+            content: '';
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, #ff5722);
+            filter: blur(5px);
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            40% { transform: translate(3px, 2px) rotate(-1deg); }
+            100% { transform: translate(1px, -1px) rotate(0deg); }
+        }
+        .shake-anim { animation: shake 0.5s; }
     </style>
 </head>
 <body>
@@ -157,6 +186,89 @@
 
     let activeProfileName = "", profiles = {}, inBattle = false, activeP = [], activeE = [], battleLoop, isNight = false;
     const STORAGE_KEY = 'citadel_v10_final';
+        let meteorTimer = 0;
+    const METEOR_COOLDOWN = 30;
+
+    // Слушаем правый клик по всему полю боя
+    window.oncontextmenu = (e) => {
+        e.preventDefault(); // Отключаем стандартное меню браузера
+        spawnMeteorShower(e.clientX, e.clientY);
+    };
+
+    function spawnMeteorShower(targetX, targetY) {
+        if (meteorTimer > 0) {
+            addLog(`Метеориты на перезарядке: ${meteorTimer}с`);
+            return;
+        }
+
+        meteorTimer = METEOR_COOLDOWN;
+        addLog("ВЫЗВАН МЕТЕОРИТНЫЙ ДОЖДЬ!");
+        playSnd(80, 'sawtooth', 2, 0.4); // Низкий гул начала атаки
+
+        // Запускаем 6 метеоритов с небольшим разбросом
+        for (let i = 0; i < 6; i++) {
+            setTimeout(() => {
+                const rx = targetX + (Math.random() * 160 - 80);
+                const ry = targetY + (Math.random() * 160 - 80);
+                createMeteorEffect(rx, ry);
+            }, i * 250);
+        }
+
+        // Таймер отсчета перезарядки
+        const cd = setInterval(() => {
+            meteorTimer--;
+            if (meteorTimer <= 0) clearInterval(cd);
+        }, 1000);
+    }
+
+    function createMeteorEffect(tx, ty) {
+        const m = document.createElement('div');
+        m.className = 'meteor';
+        
+        // Появляется высоко и правее точки удара
+        const startX = tx + 400;
+        const startY = ty - 800;
+        
+        m.style.left = startX + 'px';
+        m.style.top = startY + 'px';
+        document.body.appendChild(m);
+
+        // Запуск анимации (через небольшой таймаут, чтобы браузер успел отрисовать старт)
+        setTimeout(() => {
+            m.style.transform = `translate(-400px, 800px)`;
+            
+            // Момент столкновения
+            setTimeout(() => {
+                // Тряска экрана
+                const field = document.getElementById('field');
+                field.classList.add('shake-anim');
+                setTimeout(() => field.classList.remove('shake-anim'), 500);
+
+                // Звук взрыва (низкочастотный)
+                playSnd(50 + Math.random() * 30, 'sine', 0.8, 0.5);
+
+                // Урон врагам в радиусе взрыва
+                activeE.forEach(e => {
+                    // Учитываем смещение поля #field (320px - ширина UI)
+                    const dx = (e.x + 320) - tx;
+                    const dy = e.y - ty;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 180) { // Радиус поражения
+                        const dmg = 8000 * (profiles[activeProfileName].era || 1);
+                        e.hp -= dmg;
+                        spawnDamage(e.x, e.y, dmg);
+                        updateHP(e);
+                    }
+                });
+
+                // Удаляем метеорит после взрыва
+                m.style.opacity = '0';
+                setTimeout(() => m.remove(), 200);
+            }, 500); // Время полета совпадает с transition в CSS
+        }, 20);
+    }
+
 
     function init() {
         const saved = localStorage.getItem(STORAGE_KEY);
