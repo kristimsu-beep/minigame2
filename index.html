@@ -249,18 +249,22 @@
 
                 // Урон врагам в радиусе взрыва
                 activeE.forEach(e => {
-                    // Учитываем смещение поля #field (320px - ширина UI)
-                    const dx = (e.x + 320) - tx;
+                    // ТЕПЕРЬ ПРАВИЛЬНО: e.x - (tx - 320)
+                    // Мы переводим клик (tx) в координаты поля, вычитая 320px
+                    const targetXInField = tx - 320; 
+                    const dx = e.x - targetXInField;
                     const dy = e.y - ty;
+                    
                     const dist = Math.sqrt(dx * dx + dy * dy);
-
-                    if (dist < 180) { // Радиус поражения
+                
+                    if (dist < 180) { 
                         const dmg = 8000 * (profiles[activeProfileName].era || 1);
                         e.hp -= dmg;
                         spawnDamage(e.x, e.y, dmg);
                         updateHP(e);
                     }
                 });
+
 
                 // Удаляем метеорит после взрыва
                 m.style.opacity = '0';
@@ -472,3 +476,4 @@
 </script>
 </body>
 </html>
+
