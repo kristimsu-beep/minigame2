@@ -2,31 +2,25 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Цитадель: Мини игра 2</title>
+    <title>Цитадель: Мини игра 2 (Final Fix)</title>
     <style>
-            @keyframes damagePop { 
-                0% { transform: translateY(0); opacity: 1; } 
-                100% { transform: translateY(-50px); opacity: 0; } 
-            }
-
+        @keyframes damagePop { 
+            0% { transform: translateY(0); opacity: 1; } 
+            100% { transform: translateY(-50px); opacity: 0; } 
+        }
         :root {
             --gold: #ffc107; --stone: #607d8b; --stone-drk: #263238;
             --wood: #4e342e; --skin: #ffccbc;
         }
         body { margin: 0; background: #1b5e20; font-family: 'Segoe UI', Tahoma, sans-serif; color: white; overflow: hidden; }
 
-        /* ГРАДИЕНТНЫЕ КНОПКИ */
         .btn-grad {
             background: linear-gradient(-45deg, #3e2723, #5d4037, #8d6e63, #3e2723);
             background-size: 400% 400%;
             animation: gradient-anim 5s ease infinite;
             border: 2px solid var(--gold);
-            color: white;
-            cursor: pointer;
-            border-radius: 6px;
-            font-weight: bold;
-            transition: 0.3s;
-            text-transform: uppercase;
+            color: white; cursor: pointer; border-radius: 6px;
+            font-weight: bold; transition: 0.3s; text-transform: uppercase;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         @keyframes gradient-anim {
@@ -37,7 +31,6 @@
         .btn-grad:hover { transform: translateY(-2px); filter: brightness(1.2); }
         .btn-grad:disabled { opacity: 0.3; cursor: not-allowed; animation: none; }
 
-        /* МЕНЕДЖЕР ПРОФИЛЕЙ */
         #profile-bar {
             position: absolute; top: 10px; left: 340px; display: flex; gap: 8px; z-index: 2000;
             background: rgba(0,0,0,0.5); padding: 5px; border-radius: 10px;
@@ -49,16 +42,14 @@
         .profile-btn.active { background: var(--gold); color: #000; font-weight: bold; }
         .add-prof { background: #2e7d32; border-color: #fff; }
 
-        /* ИНТЕРФЕЙС */
         #ui { position: absolute; left: 0; top: 0; width: 320px; height: 100vh; background: #111; 
               padding: 20px; border-right: 5px solid var(--gold); z-index: 1000; box-shadow: 10px 0 20px rgba(0,0,0,0.8); box-sizing: border-box;}
         .stat { font-size: 22px; margin-bottom: 10px; color: var(--gold); font-weight: bold; }
         .army-box { background: #222; padding: 10px; border-radius: 8px; margin: 15px 0; border: 1px solid #444; font-size: 12px; min-height: 40px;}
         
-        #ui button { width: 100%; padding: 12px; margin: 4px 0; }
+        #ui button { width: 100%; padding: 10px; margin: 4px 0; font-size: 12px; }
         #battle-btn { background: linear-gradient(-45deg, #b71c1c, #d32f2f, #f44336, #b71c1c); background-size: 400% 400%; font-size: 18px; margin-top: 15px; }
 
-        /* ГРАФИКА (Дворец и Дождь) */
         .rain { position: absolute; width: 2px; height: 20px; background: rgba(255,255,255,0.2); animation: fall 0.8s linear infinite; z-index: 500; pointer-events: none; }
         @keyframes fall { to { transform: translateY(100vh) translateX(-40px); } }
 
@@ -71,24 +62,20 @@
         #gate { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 80px; height: 100px; background: #3e2723; border: 3px solid var(--gold); border-radius: 40px 40px 0 0; transition: 1s; z-index: 10; }
         #gate.open { transform: translateX(-50%) scaleY(0.1); transform-origin: bottom; }
 
-        /* ЮНИТЫ */
-        .unit { position: absolute; width: 50px; height: 80px; transition: left 0.3s, top 0.3s; z-index: 200; }
+        .unit { position: absolute; width: 50px; height: 80px; transition: left 0.1s linear, top 0.1s linear; z-index: 200; }
         .h-head { width: 16px; height: 16px; background: var(--skin); border-radius: 50%; position: absolute; top: 0; left: 17px; border: 1.5px solid #000; }
         .h-body { width: 22px; height: 30px; background: #1565c0; border: 1.5px solid #000; position: absolute; top: 16px; left: 14px; border-radius: 4px; }
         .h-leg { width: 8px; height: 25px; background: #222; position: absolute; top: 46px; border-radius: 2px; transform-origin: top; }
         .l { left: 14px; } .r { left: 28px; }
         .w-ico { position: absolute; font-size: 24px; top: 10px; right: -15px; filter: drop-shadow(0 0 3px white); }
-        .veteran::before { content: '⭐'; position: absolute; top: -25px; left: 18px; color: gold; font-size: 16px; animation: glow 1s infinite alternate; }
-        @keyframes glow { from { opacity: 0.5; } to { opacity: 1; } }
         .walking .l { animation: step 0.3s infinite alternate; }
         .walking .r { animation: step 0.3s infinite alternate-reverse; }
         @keyframes step { from { transform: rotate(-25deg); } to { transform: rotate(25deg); } }
         .hp-bar { position: absolute; top: -15px; width: 100%; height: 5px; background: #000; border: 1px solid #fff; }
-        .hp-fill { height: 100%; background: #4caf50; width: 100%; }
+        .hp-fill { height: 100%; background: #4caf50; width: 100%; transition: 0.1s; }
 
-        #field { position: absolute; left: 320px; top: 0; right: 0; bottom: 0; background: radial-gradient(circle, #2e7d32, #1b5e20); }
-        #log { position: absolute; bottom: 20px; right: 20px; width: 350px; height: 120px; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 15px; font-size: 13px; border-radius: 10px; overflow: hidden;}
-        
+        #field { position: absolute; left: 320px; top: 0; right: 0; bottom: 0; background: radial-gradient(circle, #2e7d32, #1b5e20); overflow: hidden; }
+        #log { position: absolute; bottom: 20px; right: 20px; width: 350px; height: 120px; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 15px; font-size: 13px; border-radius: 10px; overflow-y: auto; color: #fff; z-index: 3000; }
     </style>
 </head>
 <body>
@@ -133,67 +120,47 @@
 </div>
 
 <script>
-    // --- ЗВУКИ ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSnd(f, t, d, v) {
-        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+d);
-        o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d);
+        try {
+            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+            o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+            g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+d);
+            o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d);
+        } catch(e){}
     }
-
-    // --- МЕНЕДЖЕР ПРОФИЛЕЙ ---
-    let activeProfileName = "Крепость";
-    let profiles = {}; // { name: { data } }
 
     const config = {
         sword: { ico: '⚔️', cost: 5, hp: 100, dmg: 35, color: '#1565c0' },
         mace: { ico: '🔨', cost: 25, hp: 130, dmg: 50, color: '#6d4c41' },
         rider: { ico: '🏇', cost: 50, hp: 160, dmg: 70, color: '#1e88e5' },
         cannon: { ico: '💣', cost: 100, hp: 100, dmg: 200, color: '#424242' },
-        giant: { ico: '👹', cost: 250, hp: 900, dmg: 300, color: '#1b5e20', scale: 1.6 }
-            // Добавь это внутрь объекта config
+        giant: { ico: '👹', cost: 250, hp: 900, dmg: 300, color: '#1b5e20', scale: 1.6 },
         iron_guard: { ico: '🛡️', cost: 1000, hp: 3000, dmg: 150, color: '#455a64', scale: 1.8 },
-        paladin: { ico: '👑', cost: 2500, hp: 7000, dmg: 400, color: '#fbc02d', scale: 2.2 
+        paladin: { ico: '👑', cost: 2500, hp: 7000, dmg: 400, color: '#fbc02d', scale: 2.2 }
     };
 
+    let activeProfileName = "Крепость";
+    let profiles = {};
+    const STORAGE_KEY = 'citadel_profiles_v3';
 
-
-// 1. Поменяй ключ тут (добавь v3)
     function initStorage() {
-        const saved = localStorage.getItem('citadel_profiles_v3'); 
+        const saved = localStorage.getItem(STORAGE_KEY); 
         if (saved) {
             profiles = JSON.parse(saved);
             activeProfileName = Object.keys(profiles)[0] || "Крепость";
         }
-        
-        // Если база пуста (первый запуск v3), создаем "Крепость"
         if (Object.keys(profiles).length === 0) {
-            profiles["Крепость"] = { money: 0, lvl: 1, upCost: 50, armyInv: [] };
+            profiles["Крепость"] = { money: 100, lvl: 1, upCost: 50, armyInv: [] };
             activeProfileName = "Крепость";
         }
-        
         renderProfiles();
         loadActiveProfile();
     }
 
-    // 2. И поменяй ключ тут (тоже v3)
     function saveAll() {
-        localStorage.setItem('citadel_profiles_v3', JSON.stringify(profiles));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
     }
-
-        function createNewProfile() {
-            const name = prompt("Введите имя нового пр:");
-            if (name && !profiles[name]) {
-                profiles[name] = { money: 0, lvl: 1, upCost: 50, armyInv: [] };
-                activeProfileName = name;
-                saveAll();
-                renderProfiles();
-                loadActiveProfile();
-            } else if (profiles[name]) {
-                alert("Имя занято!");
-            }
-        }
 
     function renderProfiles() {
         const list = document.getElementById('profile-list');
@@ -215,19 +182,13 @@
         addLog("Переход на профиль: " + name);
     }
 
-    function deleteCurrentProfile() {
-        if (Object.keys(profiles).length <= 1) return alert("Нельзя удалить единственный профиль!");
-        if (confirm(`Удалить профиль ${activeProfileName}?`)) {
-            delete profiles[activeProfileName];
-            activeProfileName = Object.keys(profiles)[0];
-            saveAll();
-            renderProfiles();
-            loadActiveProfile();
-        }
-    }
-
-    function saveAll() {
-        localStorage.setItem('citadel_profiles_v2', JSON.stringify(profiles));
+    function createNewProfile() {
+        const name = prompt("Введите имя нового профиля:");
+        if (name && !profiles[name]) {
+            profiles[name] = { money: 100, lvl: 1, upCost: 50, armyInv: [] };
+            activeProfileName = name;
+            saveAll(); renderProfiles(); loadActiveProfile();
+        } else if (profiles[name]) alert("Имя занято!");
     }
 
     function loadActiveProfile() {
@@ -240,25 +201,22 @@
         updateButtons();
     }
 
-    // --- ИГРОВАЯ ЛОГИКА ---
-    let inBattle = false, activeP = [], activeE = [];
-
-    // Дождь
-    for(let i=0; i<40; i++) {
-        let r = document.createElement('div'); r.className = 'rain';
-        r.style.left = Math.random() * 100 + '%'; r.style.animationDelay = Math.random() * 2 + 's';
-        document.body.appendChild(r);
+    function addLog(m) { 
+        const l = document.getElementById('log'); 
+        l.innerHTML = `> ${m}<br>${l.innerHTML}`; 
     }
 
-     function addMoney() { 
+    function updateButtons() {
         let p = profiles[activeProfileName];
-        // Даем золото: уровень дворца * 5 (на 10 уровне будет +50 за клик)
+        document.getElementById('upBtn').disabled = (p.money < p.upCost || p.lvl >= 10);
+    }
+
+    function addMoney() { 
+        let p = profiles[activeProfileName];
         p.money += (p.lvl * 5); 
         playSnd(900, 'sine', 0.1, 0.1); 
-        saveAll(); 
-        loadActiveProfile(); 
+        saveAll(); loadActiveProfile(); 
     }
-
 
     function upgrade() {
         let p = profiles[activeProfileName];
@@ -279,14 +237,8 @@
         }
     }
 
-    function updateButtons() {
-        let p = profiles[activeProfileName];
-        document.getElementById('upBtn').disabled = p.money < p.upCost || p.lvl >= 10;
-    }
+    let inBattle = false, activeP = [], activeE = [];
 
-    function addLog(m) { const l = document.getElementById('log'); l.innerHTML = `> ${m}<br>${l.innerHTML}`; }
-
-    // --- БОЙ --- (Упрощенная логика из предыдущих версий)
     function createUnit(u, isE, isB = false) {
         const d = document.createElement('div');
         d.className = 'unit walking' + (isE ? ' enemy' : '') + (u.level > 1 ? ' veteran' : '');
@@ -295,7 +247,14 @@
         d.innerHTML = `<div class="hp-bar"><div class="hp-fill"></div></div><div class="h-head"></div><div class="h-body" style="background:${c}"></div><div class="h-leg l"></div><div class="h-leg r"></div><div class="w-ico">${isE ? (isB?'🐉':'💀') : config[u.type].ico}</div>`;
         d.style.transform = `scale(${s}) ${isE ? 'scaleX(-1)' : ''}`;
         document.getElementById('units-layer').appendChild(d);
-        return { dom: d, hp: isE ? (isB?2000:100) : (config[u.type].hp * (1+u.level*0.2)), maxHp: isE?(isB?2000:100) : (config[u.type].hp*(1+u.level*0.2)), data: u, isE, isB, x: isE?1000:300, y: 150+Math.random()*400, dmg: isE?(isB?100:20) : (config[u.type].dmg*(1+u.level*0.2)) };
+        
+        let hpVal = isE ? (isB ? 2000 : 100) : (config[u.type].hp * (1 + u.level * 0.2));
+        return { 
+            dom: d, hp: hpVal, maxHp: hpVal, data: u, isE, isB, 
+            x: isE ? (window.innerWidth - 450) : 320, 
+            y: 100 + Math.random() * (window.innerHeight - 250), 
+            dmg: isE ? (isB ? 100 : 20) : (config[u.type].dmg * (1 + u.level * 0.2)) 
+        };
     }
 
     function startBattle() {
@@ -304,102 +263,98 @@
         inBattle = true;
         document.getElementById('gate').classList.add('open');
         activeP = p.armyInv.map(u => createUnit(u, false));
-        let eCount = p.armyInv.length + 3;
+        let eCount = p.armyInv.length + 2;
         for(let i=0; i<eCount; i++) activeE.push(createUnit({type:'sword', level:1}, true));
-        if(Math.random() > 0.5) activeE.push(createUnit({type:'sword', level:1}, true, true));
+        if(Math.random() > 0.7) activeE.push(createUnit({type:'sword', level:1}, true, true));
 
-    const loop = setInterval(() => {
-    // 1. Проверка окончания боя
-    if (activeP.length === 0 || activeE.length === 0) { 
-        clearInterval(loop); 
-        endBattle(); 
-        return; 
+        const loop = setInterval(() => {
+            if (activeP.length === 0 || activeE.length === 0) { 
+                clearInterval(loop); 
+                endBattle(); 
+                return; 
+            }
+            
+            activeP.forEach(u => {
+                let target = activeE[0]; 
+                if (target && u.x < target.x - 60) { u.x += 8; u.dom.classList.add('walking'); } 
+                else if(target) { 
+                    u.dom.classList.remove('walking'); 
+                    target.hp -= u.dmg / 10; updateHP(target); 
+                    if(Math.random() > 0.9) spawnDamage(target.x, target.y, u.dmg/10);
+                }
+                u.dom.style.left = u.x + 'px'; u.dom.style.top = u.y + 'px';
+                u.dom.style.zIndex = Math.floor(u.y);
+            });
+
+            activeE.forEach(e => {
+                let target = activeP[0];
+                if (target && e.x > target.x + 60) { e.x -= 7; e.dom.classList.add('walking'); } 
+                else if(target) { 
+                    e.dom.classList.remove('walking'); 
+                    target.hp -= e.dmg / 10; updateHP(target); 
+                }
+                e.dom.style.left = e.x + 'px'; e.dom.style.top = e.y + 'px';
+                e.dom.style.zIndex = Math.floor(e.y);
+            });
+
+            activeP = activeP.filter(u => { if(u.hp <= 0) { u.dom.remove(); return false; } return true; });
+            activeE = activeE.filter(e => { 
+                if(e.hp <= 0) { 
+                    e.dom.remove(); 
+                    profiles[activeProfileName].money += e.isB ? 300 : 20; 
+                    activeP.forEach(p => p.data.xp++);
+                    loadActiveProfile();
+                    return false; 
+                } 
+                return true; 
+            });
+        }, 100);
     }
-    
-    // 2. Логика твоих воинов (Атакуют ПЕРВОГО врага в списке)
-    activeP.forEach(u => {
-        let target = activeE[0]; 
-        if (target && u.x < target.x - 60) { 
-            u.x += 12; 
-            u.dom.classList.add('walking'); 
-        } else if(target) { 
-            u.dom.classList.remove('walking'); 
-            target.hp -= u.dmg / 10; 
-            updateHP(target); 
-            spawnDamage(target.x, target.y, u.dmg / 10); 
-        }
-        u.dom.style.left = u.x + 'px'; 
-        u.dom.style.top = u.y + 'px';
-        u.dom.style.zIndex = Math.floor(u.y); // Сортировка слоев (кто ниже, тот спереди)
-    });
-
-    // 3. Логика врагов (Атакуют ПЕРВОГО твоего воина)
-    activeE.forEach(e => {
-        let target = activeP[0];
-        if (target && e.x > target.x + 60) { 
-            e.x -= 10; 
-            e.dom.classList.add('walking'); 
-        } else if(target) { 
-            e.dom.classList.remove('walking'); 
-            target.hp -= e.dmg / 10; 
-            updateHP(target); 
-            spawnDamage(target.x, target.y, e.dmg / 10);
-        }
-        // ИСПРАВЛЕНО: используем e.dom вместо u.dom
-        e.dom.style.left = e.x + 'px'; 
-        e.dom.style.top = e.y + 'px';
-        e.dom.style.zIndex = Math.floor(e.y);
-    });
-
-    // 4. Очистка погибших воинов
-    activeP = activeP.filter(u => { 
-        if(u.hp <= 0) { u.dom.remove(); return false; } 
-        return true; 
-    });
-
-    // 5. Очистка погибших врагов + Награда
-    activeE = activeE.filter(e => { 
-        if(e.hp <= 0) { 
-            e.dom.remove(); 
-            // Награда за обычного врага или Босса
-            profiles[activeProfileName].money += e.isB ? 300 : 20; 
-            // Прокачка опыта выжившим
-            activeP.forEach(p => p.data.xp++); 
-            updateUI(); // Обновляем цифры золота на экране сразу
-            return false; 
-        } 
-        return true; 
-    });
-
-}, 100);
 
     function updateHP(u) { 
-        if(u.dom) u.dom.querySelector('.hp-fill').style.width = (u.hp/u.maxHp*100) + '%'; 
+        if(u.dom) u.dom.querySelector('.hp-fill').style.width = Math.max(0, (u.hp/u.maxHp*100)) + '%'; 
+    }
+
+    function spawnDamage(x, y, d) {
+        const p = document.createElement('div');
+        p.style.cssText = `position:absolute; left:${x}px; top:${y}px; color:#ff5252; font-weight:bold; z-index:5000; animation: damagePop 0.8s forwards;`;
+        p.innerText = "-" + Math.floor(d);
+        document.getElementById('field').appendChild(p);
+        setTimeout(() => p.remove(), 800);
     }
 
     function endBattle() {
         inBattle = false;
         document.getElementById('gate').classList.remove('open');
+        const win = activeP.length > 0;
+        addLog(win ? "ПОБЕДА!" : "ПОРАЖЕНИЕ...");
+        
         profiles[activeProfileName].armyInv = activeP.map(u => {
             let d = u.data;
-            if(d.xp >= 10) { d.level++; d.xp = 0; addLog("ВЕТЕРАН УРОВНЯ " + d.level); }
+            if(d.xp >= 10) { d.level++; d.xp = 0; addLog("Юнит стал ветераном!"); }
             return d;
         });
-        activeP.forEach(u => u.dom.remove()); activeE.forEach(e => e.dom.remove());
+
+        activeP.forEach(u => u.dom.remove()); 
+        activeE.forEach(e => e.dom.remove());
         activeP = []; activeE = []; 
         saveAll(); loadActiveProfile();
     }
 
-    // Исправленная функция урона (с закрытой скобкой)
-    function spawnDamage(x, y, d) {
-        const p = document.createElement('div');
-        p.style.cssText = `position:absolute; left:${x}px; top:${y}px; color:#ff5252; 
-                          font-weight:bold; pointer-events:none; z-index:5000;
-                          animation: damagePop 0.8s forwards; font-family: Arial;`;
-        p.innerText = "-" + Math.floor(d);
-        document.getElementById('field').appendChild(p);
-        setTimeout(() => p.remove(), 800);
-    } // <-- Скобка была пропущена
+    function deleteCurrentProfile() {
+        if (Object.keys(profiles).length <= 1) return alert("Нельзя удалить единственный профиль!");
+        if (confirm(`Удалить профиль ${activeProfileName}?`)) {
+            delete profiles[activeProfileName];
+            activeProfileName = Object.keys(profiles)[0];
+            saveAll(); renderProfiles(); loadActiveProfile();
+        }
+    }
+
+    for(let i=0; i<40; i++) {
+        let r = document.createElement('div'); r.className = 'rain';
+        r.style.left = Math.random() * 100 + '%'; r.style.animationDelay = Math.random() * 2 + 's';
+        document.body.appendChild(r);
+    }
 
     initStorage();
 
