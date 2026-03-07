@@ -8,7 +8,6 @@
         @keyframes damagePop { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-50px); opacity: 0; } }
         @keyframes step { from { transform: rotate(-25deg); } to { transform: rotate(25deg); } }
         @keyframes gradient-anim { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        @keyframes neonGlow { from { box-shadow: 0 0 5px #00f2ff; } to { box-shadow: 0 0 20px #00f2ff; } }
 
         :root { 
             --gold: #ffc107; --stone: #607d8b; --stone-drk: #263238; 
@@ -20,6 +19,7 @@
         #ui { 
             position: absolute; left: 0; top: 0; width: 320px; height: 100vh; background: #111; 
             padding: 20px; border-right: 4px solid var(--gold); z-index: 1000; box-sizing: border-box; overflow-y: auto;
+            transition: background 0.5s;
         }
         .stat { font-size: 19px; margin-bottom: 8px; color: var(--gold); font-weight: bold; }
         .era-tag { background: var(--gold); color: #000; padding: 4px 10px; border-radius: 4px; font-size: 13px; margin-bottom: 15px; display: inline-block; font-weight: bold; }
@@ -41,7 +41,11 @@
         .profile-btn.active { background: var(--gold); color: #000; font-weight: bold; }
 
         /* ПОЛЕ И КРЕПОСТЬ */
-        #field { position: absolute; left: 320px; top: 0; right: 0; bottom: 0; background: radial-gradient(circle, #2e7d32, #1b5e20); overflow: hidden; }
+        #field { 
+            position: absolute; left: 320px; top: 0; right: 0; bottom: 0; 
+            background: radial-gradient(circle, #2e7d32, #1b5e20); 
+            overflow: hidden; transition: filter 1s ease;
+        }
         #castle-wrap { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 280px; height: 450px; z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
         .tower { border: 3px solid #111; transition: 0.5s; position: relative; }
         .t-side { width: 60px; height: 40%; border-radius: 5px 5px 0 0; }
@@ -51,7 +55,10 @@
         #gate.open { transform: translateX(-50%) scaleY(0.1); transform-origin: bottom; }
 
         /* ЮНИТЫ */
-        .unit { position: absolute; width: 50px; height: 80px; z-index: 200; }
+        .unit { 
+            position: absolute; width: 50px; height: 80px; z-index: 200; 
+            transition: left 0.1s linear; /* ПЛАВНОЕ ПЕРЕМЕЩЕНИЕ */
+        }
         .h-body { width: 22px; height: 30px; border: 1.5px solid #000; position: absolute; top: 16px; left: 14px; border-radius: 4px; }
         .h-head { width: 16px; height: 16px; background: var(--skin); border-radius: 50%; position: absolute; top: 0; left: 17px; border: 1.5px solid #000; }
         .h-leg { width: 8px; height: 22px; background: #222; position: absolute; top: 46px; border-radius: 2px; transform-origin: top; }
@@ -76,6 +83,7 @@
 <div id="profile-bar">
     <div id="profile-list" style="display:flex; gap:5px;"></div>
     <button class="profile-btn" onclick="createNewProfile()" style="background:#2e7d32; border-color:#fff;">+ НОВЫЙ</button>
+    <button class="profile-btn" onclick="toggleNight()">🌙 ТЕМА</button>
 </div>
 
 <div id="ui">
@@ -147,7 +155,7 @@
         general: { ico: '🎖️', cost: 100000, hp: 200000, dmg: 30000, color: '#1a237e', isGeneral: true }
     };
 
-    let activeProfileName = "", profiles = {}, inBattle = false, activeP = [], activeE = [], battleLoop;
+    let activeProfileName = "", profiles = {}, inBattle = false, activeP = [], activeE = [], battleLoop, isNight = false;
     const STORAGE_KEY = 'citadel_v10_final';
 
     function init() {
@@ -181,21 +189,17 @@
         updateCastleGraphics(p.lvl, p.era);
     }
 
-    function updateCastleGraphics(lvl, era) {
-        const ts1 = document.getElementById('ts1'), ts2 = document.getElementById('ts2'), tm = document.getElementById('tm');
-        const accent = era === 2 ? 'cyan' : '#ffc107';
-        const stoneGrad = era === 2 ? 'linear-gradient(to bottom, #263238, #455a64)' : 'linear-gradient(to bottom, #607d8b, #263238)';
-        
-        ts1.style.height = (35 + lvl * 4) + '%';
-        ts2.style.height = (35 + lvl * 4) + '%';
-        tm.style.height = (65 + lvl * 3) + '%';
-        
-        [ts1, ts2, tm].forEach(el => {
-            el.style.background = stoneGrad;
-            el.style.borderColor = accent;
-            if(era === 2) el.style.boxShadow = `0 0 ${lvl*3}px cyan`;
-        });
-        document.getElementById('main-dome').style.background = lvl >= 10 ? accent : '#455a64';
+    function toggleNight() {
+        isNight = !isNight;
+        const field = document.getElementById('field');
+        const ui = document.getElementById('ui');
+        if(isNight) {
+            field.style.filter = "brightness(0.4) contrast(1.2) hue-rotate(50deg)";
+            ui.style.background = "#050505";
+        } else {
+            field.style.filter = "none";
+            ui.style.background = "#111";
+        }
     }
 
     function createUnit(u, isE, isB = false) {
@@ -217,7 +221,7 @@
         d.style.transform = `scale(${s}) ${isE ? 'scaleX(-1)' : ''}`;
         document.getElementById('units-layer').appendChild(d);
         
-        return { dom: d, hp: char.hp, maxHp: char.hp, data: u, x: isE ? window.innerWidth-450 : 350, y: parseInt(d.style.top), dmg: char.dmg, isB, isGeneral: char.isGeneral };
+        return { dom: d, type: u.type, hp: char.hp, maxHp: char.hp, data: u, x: isE ? window.innerWidth-450 : 350, y: parseInt(d.style.top), dmg: char.dmg, isB, isGeneral: char.isGeneral };
     }
 
     function startBattle() {
@@ -235,9 +239,23 @@
 
             activeP.forEach(u => {
                 let target = activeE[0];
-                if (target && u.x < target.x - 80) { u.x += 12; u.dom.classList.add('walking'); } 
+                if (target && u.x < target.x - 80) { 
+                    u.x += 12; u.dom.classList.add('walking'); 
+                } 
                 else if(target) { 
-                    u.dom.classList.remove('walking'); target.hp -= u.dmg/10; updateHP(target); 
+                    u.dom.classList.remove('walking'); 
+                    
+                    // МАССОВАЯ АТАКА (Гигант и выше)
+                    const massUnits = ['giant', 'iron_guard', 'armored_car', 'soldier', 'heavy', 'tank', 'jet', 'general'];
+                    if(massUnits.includes(u.type)) {
+                        let count = Math.floor(Math.random() * 21) + 5; 
+                        for(let i=0; i<count && i<activeE.length; i++) {
+                            activeE[i].hp -= u.dmg/10; updateHP(activeE[i]);
+                        }
+                    } else {
+                        target.hp -= u.dmg/10; updateHP(target); 
+                    }
+
                     if(u.isGeneral && Math.random() > 0.9) spawnMiniDrone(u.x, u.y, target);
                     if(Math.random() > 0.95) spawnDamage(target.x, target.y, u.dmg/10);
                 }
@@ -322,6 +340,20 @@
     }
     function deleteCurrentProfile() {
         if(confirm("Удалить профиль?")) { delete profiles[activeProfileName]; location.reload(); }
+    }
+    function updateCastleGraphics(lvl, era) {
+        const ts1 = document.getElementById('ts1'), ts2 = document.getElementById('ts2'), tm = document.getElementById('tm');
+        const accent = era === 2 ? 'cyan' : '#ffc107';
+        const stoneGrad = era === 2 ? 'linear-gradient(to bottom, #263238, #455a64)' : 'linear-gradient(to bottom, #607d8b, #263238)';
+        ts1.style.height = (35 + lvl * 4) + '%';
+        ts2.style.height = (35 + lvl * 4) + '%';
+        tm.style.height = (65 + lvl * 3) + '%';
+        [ts1, ts2, tm].forEach(el => {
+            el.style.background = stoneGrad;
+            el.style.borderColor = accent;
+            if(era === 2) el.style.boxShadow = `0 0 ${lvl*3}px cyan`;
+        });
+        document.getElementById('main-dome').style.background = lvl >= 10 ? accent : '#455a64';
     }
 
     init();
