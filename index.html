@@ -142,6 +142,14 @@
         <button class="btn-grad" onclick="buy('jet')" style="border-color:var(--neon)">✈️ Истребитель (50k)</button>
         <button class="btn-grad" onclick="buy('general')" style="border-color:var(--neon)">🎖️ Генерал Дронов (100k)</button>
     </div>
+    <div id="shop-3" style="display:none;">
+        <button class="btn-grad" onclick="buy('titan')" style="border-color:#ff5722">🗿 Титан (250k)</button>
+        <button class="btn-grad" onclick="buy('fly_titan')" style="border-color:#ff5722">🦅 Летающий Титан (500k)</button>
+        <button class="btn-grad" onclick="buy('mecha_titan')" style="border-color:#ff5722">🤖 Меха-Титан (1M)</button>
+        <button class="btn-grad" onclick="buy('drone_titan')" style="border-color:#ff5722">🛰️ Титан Дронов (5M)</button>
+        <button class="btn-grad" onclick="buy('ultimate_titan')" style="border-color:#ff5722">🌌 ULTIMATE (10M)</button>
+    </div>
+
 
     <button class="btn-grad" id="battle-btn" onclick="startBattle()">⚔️ В БОЙ!</button>
     <button id="era-btn" class="btn-grad" onclick="checkEraTransfer()" style="display:none; background:var(--neon); color:#000;">🚀 НОВАЯ ЭРА</button>
@@ -182,6 +190,13 @@
         tank: { ico: '📟', cost: 25000, hp: 120000, dmg: 9000, color: '#1b5e20', scale: 2.5 },
         jet: { ico: '✈️', cost: 50000, hp: 80000, dmg: 20000, color: '#37474f', scale: 2.8 },
         general: { ico: '🎖️', cost: 100000, hp: 200000, dmg: 30000, color: '#1a237e', isGeneral: true }
+            // ТРЕТЬЯ ЭРА - ТИТАНЫ
+        titan: { ico: '🗿', cost: 250000, hp: 500000, dmg: 50000, color: '#424242', scale: 3.5 },
+        fly_titan: { ico: '🦅', cost: 500000, hp: 800000, dmg: 80000, color: '#1a237e', scale: 3.8 },
+        mecha_titan: { ico: '🤖', cost: 1000000, hp: 2000000, dmg: 150000, color: '#006064', scale: 4.2 },
+        drone_titan: { ico: '🛰️', cost: 5000000, hp: 5000000, dmg: 300000, color: '#311b92', isGeneral: true, scale: 4.5 },
+        ultimate_titan: { ico: '🌌', cost: 10000000, hp: 15000000, dmg: 1000000, color: '#000', scale: 5.5 }
+
     };
 
     let activeProfileName = "", profiles = {}, inBattle = false, activeP = [], activeE = [], battleLoop, isNight = false;
@@ -309,22 +324,61 @@
 
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles)); }
 
-    function loadProfile() {
-        const p = profiles[activeProfileName];
-        document.getElementById('money').innerText = Math.floor(p.money);
-        document.getElementById('lvl').innerText = p.lvl;
-        document.getElementById('upCost').innerText = p.upCost;
-        document.getElementById('battleNum').innerText = p.battleNum;
-        document.getElementById('era-tag').innerText = `ЭПОХА: ${p.era === 1 ? 'СРЕДНЕВЕКОВЬЕ' : 'МОДЕРН'}`;
-        
-        document.getElementById('shop-1').style.display = p.era === 1 ? 'block' : 'none';
-        document.getElementById('shop-2').style.display = p.era === 2 ? 'block' : 'none';
-        
-        const hasAll = ['sword','mace','rider','cannon','giant','iron_guard','armored_car'].every(t => p.armyInv.some(u => u.type === t));
-        document.getElementById('era-btn').style.display = (p.era === 1 && p.lvl >= 10 && hasAll) ? 'block' : 'none';
-        
-        updateCastleGraphics(p.lvl, p.era);
+   function loadProfile() {
+    const p = profiles[activeProfileName];
+    // Обязательно оставь эти строки, чтобы цифры в меню обновлялись:
+    document.getElementById('money').innerText = Math.floor(p.money);
+    document.getElementById('lvl').innerText = p.lvl;
+    document.getElementById('upCost').innerText = Math.floor(p.upCost);
+    document.getElementById('battleNum').innerText = p.battleNum;
+    document.getElementById('era-tag').innerText = `ЭПОХА: ${p.era === 1 ? 'СРЕДНЕВЕКОВЬЕ' : (p.era === 2 ? 'МОДЕРН' : 'КОСМОС')}`;
+    
+    // Управление магазинами
+    document.getElementById('shop-1').style.display = p.era === 1 ? 'block' : 'none';
+    document.getElementById('shop-2').style.display = p.era === 2 ? 'block' : 'none';
+    document.getElementById('shop-3').style.display = p.era === 3 ? 'block' : 'none';
+
+    // Условие появления кнопки новой эры
+    const canGoToEra2 = p.era === 1 && p.lvl >= 10;
+    const canGoToEra3 = p.era === 2 && p.lvl >= 20 && p.bossDefeated;
+    
+    const eraBtn = document.getElementById('era-btn');
+    if (canGoToEra2 || canGoToEra3) {
+        eraBtn.style.display = 'block';
+        eraBtn.innerText = p.era === 1 ? "🚀 В МОДЕРН" : "🌌 В КОСМОС";
+    } else {
+        eraBtn.style.display = 'none';
     }
+
+    updateCastleGraphics(p.lvl, p.era);
+}
+
+    
+    function upgrade() { 
+        let p = profiles[activeProfileName]; 
+        let maxLvl = p.era === 1 ? 10 : 20; // Лимит уровня растет с эрой
+        if(p.money >= p.upCost && p.lvl < maxLvl) { 
+            p.money -= p.upCost; p.lvl++; p.upCost *= 1.8; 
+            save(); loadProfile(); 
+        } 
+    }
+    
+    function updateCastleGraphics(lvl, era) {
+        const ts1 = document.getElementById('ts1'), ts2 = document.getElementById('ts2'), tm = document.getElementById('tm');
+        let color = era === 1 ? '#ffc107' : (era === 2 ? 'cyan' : '#ff00ff');
+        
+        // Масштабирование: замок становится шире и выше
+        ts1.style.width = (60 + lvl * 2) + 'px';
+        ts2.style.width = (60 + lvl * 2) + 'px';
+        tm.style.width = (150 + lvl * 5) + 'px';
+        
+        [ts1, ts2, tm].forEach(el => {
+            el.style.borderColor = color;
+            el.style.boxShadow = `0 0 ${lvl * 5}px ${color}`;
+            if(era === 3) el.style.filter = "hue-rotate(45deg) brightness(1.5)";
+        });
+    }
+
 
     function toggleNight() {
         isNight = !isNight;
@@ -436,6 +490,11 @@
         
         document.querySelectorAll('.unit, .drone-mini').forEach(u => u.remove());
         activeP = []; activeE = []; save(); loadProfile();
+        if (p.era === 3 && p.battleNum >= 50) {
+            alert("ПОЗДРАВЛЯЕМ! ВЫ ПОКОРИЛИ ВСЕЛЕННУЮ С ПОМОЩЬЮ ТИТАНОВ!");
+            // Можно добавить редирект или салют
+    }    
+
     }
 
     function addLog(m) { const l = document.getElementById('log'); l.innerHTML = `> ${m}<br>${l.innerHTML}`; }
@@ -497,5 +556,6 @@
 </script>
 </body>
 </html>
+
 
 
