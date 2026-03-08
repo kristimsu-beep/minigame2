@@ -55,10 +55,15 @@
         #gate.open { transform: translateX(-50%) scaleY(0.1); transform-origin: bottom; }
 
         /* ЮНИТЫ */
-        .unit { 
-            position: absolute; width: 50px; height: 80px; z-index: 200; 
-            transition: left 0.1s linear; /* ПЛАВНОЕ ПЕРЕМЕЩЕНИЕ */
+            .unit { 
+            position: absolute; 
+            width: 50px; 
+            height: 80px; 
+            z-index: 200; 
+            transition: left 0.1s linear; 
+            transform-origin: bottom center; /* ДОБАВИТЬ ЭТО, чтобы Титаны стояли на земле */
         }
+
         .h-body { width: 22px; height: 30px; border: 1.5px solid #000; position: absolute; top: 16px; left: 14px; border-radius: 4px; }
         .h-head { width: 16px; height: 16px; background: var(--skin); border-radius: 50%; position: absolute; top: 0; left: 17px; border: 1.5px solid #000; }
         .h-leg { width: 8px; height: 22px; background: #222; position: absolute; top: 46px; border-radius: 2px; transform-origin: top; }
@@ -189,8 +194,8 @@
         heavy: { ico: '🔥', cost: 10000, hp: 50000, dmg: 4000, color: '#c62828', scale: 1.3 },
         tank: { ico: '📟', cost: 25000, hp: 120000, dmg: 9000, color: '#1b5e20', scale: 2.5 },
         jet: { ico: '✈️', cost: 50000, hp: 80000, dmg: 20000, color: '#37474f', scale: 2.8 },
-        general: { ico: '🎖️', cost: 100000, hp: 200000, dmg: 30000, color: '#1a237e', isGeneral: true }
-            // ТРЕТЬЯ ЭРА - ТИТАНЫ
+        general: { ico: '🎖️', cost: 100000, hp: 200000, dmg: 30000, color: '#1a237e', isGeneral: true }, // ДОБАВЬ ЗАПЯТУЮ ЗДЕСЬ
+        // ТРЕТЬЯ ЭРА - ТИТАНЫ
         titan: { ico: '🗿', cost: 250000, hp: 500000, dmg: 50000, color: '#424242', scale: 3.5 },
         fly_titan: { ico: '🦅', cost: 500000, hp: 800000, dmg: 80000, color: '#1a237e', scale: 3.8 },
         mecha_titan: { ico: '🤖', cost: 1000000, hp: 2000000, dmg: 150000, color: '#006064', scale: 4.2 },
@@ -415,12 +420,14 @@
         return { dom: d, type: u.type, hp: char.hp, maxHp: char.hp, data: u, x: isE ? window.innerWidth-450 : 350, y: parseInt(d.style.top), dmg: char.dmg, isB, isGeneral: char.isGeneral };
     }
 
-    function startBattle() {
+     function startBattle() {
         let p = profiles[activeProfileName];
         if (inBattle || !p.armyInv.length) return;
-        inBattle = true; document.getElementById('gate').classList.add('open');
+        inBattle = true; 
+        document.getElementById('gate').classList.add('open');
         activeP = p.armyInv.map(u => createUnit(u, false));
         
+        // Сложность врагов зависит от боя и эры
         let isBoss = (p.battleNum % 10 === 0);
         for(let i=0; i < p.battleNum + 2; i++) activeE.push(createUnit({type:'enemy'}, true));
         if(isBoss) activeE.push(createUnit({type:'boss'}, true, true));
@@ -436,21 +443,24 @@
                 else if(target) { 
                     u.dom.classList.remove('walking'); 
                     
-                    // МАССОВАЯ АТАКА (Гигант и выше)
-                    const massUnits = ['giant', 'iron_guard', 'armored_car', 'soldier', 'heavy', 'tank', 'jet', 'general'];
+                    // МАССОВАЯ АТАКА (Добавлены все Титаны и тяжелая техника)
+                    const massUnits = ['giant', 'iron_guard', 'armored_car', 'soldier', 'heavy', 'tank', 'jet', 'general', 'titan', 'fly_titan', 'mecha_titan', 'drone_titan', 'ultimate_titan'];
                     if(massUnits.includes(u.type)) {
-                        let count = Math.floor(Math.random() * 21) + 5; 
+                        let count = Math.floor(Math.random() * 21) + 5; // Бьем от 5 до 25 врагов
                         for(let i=0; i<count && i<activeE.length; i++) {
-                            activeE[i].hp -= u.dmg/10; updateHP(activeE[i]);
+                            activeE[i].hp -= u.dmg/10; 
+                            updateHP(activeE[i]);
                         }
                     } else {
-                        target.hp -= u.dmg/10; updateHP(target); 
+                        target.hp -= u.dmg/10; 
+                        updateHP(target); 
                     }
 
                     if(u.isGeneral && Math.random() > 0.9) spawnMiniDrone(u.x, u.y, target);
                     if(Math.random() > 0.95) spawnDamage(target.x, target.y, u.dmg/10);
                 }
-                u.dom.style.left = u.x + 'px'; u.dom.style.zIndex = Math.floor(u.y);
+                u.dom.style.left = u.x + 'px'; 
+                u.dom.style.zIndex = Math.floor(u.y);
             });
 
             activeE.forEach(e => {
@@ -463,7 +473,8 @@
             activeP = activeP.filter(u => u.hp > 0 || (u.dom.remove() && false));
             activeE = activeE.filter(e => {
                 if(e.hp <= 0) {
-                    e.dom.remove(); profiles[activeProfileName].money += (e.isB ? 3000 : 50);
+                    e.dom.remove(); 
+                    profiles[activeProfileName].money += (e.isB ? 3000 * p.era : 50 * p.era);
                     if(e.isB) profiles[activeProfileName].bossDefeated = true;
                     activeP.forEach(pU => { 
                         pU.data.xp = Math.min(10, (pU.data.xp||0) + 1);
@@ -476,28 +487,104 @@
         }, 100);
     }
 
+    function upgrade() { 
+        let p = profiles[activeProfileName]; 
+        // Лимит 10 для 1 эры, 20 для остальных
+        let maxLvl = p.era === 1 ? 10 : 20; 
+        if(p.money >= p.upCost && p.lvl < maxLvl) { 
+            p.money -= p.upCost; 
+            p.lvl++; 
+            p.upCost *= 1.8; 
+            playSnd(500, 'triangle', 0.5, 0.2); 
+            save(); 
+            loadProfile(); 
+        } else if (p.lvl >= maxLvl) {
+            addLog("Дворец достиг максимума для этой эры!");
+        }
+    }
+
+    function checkEraTransfer() {
+        let p = profiles[activeProfileName];
+        // Переход 1 -> 2
+        if (p.era === 1 && p.lvl >= 10 && p.bossDefeated) {
+            p.era = 2; 
+            p.money += 20000; 
+            p.bossDefeated = false; // Сброс для следующего этапа
+            addLog("ЭПОХА МОДЕРНА ДОСТИГНУТА!");
+            playSnd(800, 'sine', 1, 0.3);
+        } 
+        // Переход 2 -> 3
+        else if (p.era === 2 && p.lvl >= 20 && p.bossDefeated) {
+            p.era = 3; 
+            p.money += 100000; 
+            addLog("ДОБРО ПОЖАЛОВАТЬ В КОСМОС (ЭРА ТИТАНОВ)!");
+            playSnd(1500, 'sine', 1.5, 0.4);
+        } else {
+            alert("Нужен макс. уровень дворца и победа над БОССОМ этой эры (каждый 10-й бой)!");
+        }
+        save(); 
+        loadProfile();
+    }
+
+
     function endBattle() {
         clearInterval(battleLoop);
-        inBattle = false; document.getElementById('gate').classList.remove('open');
+        inBattle = false; 
+        document.getElementById('gate').classList.remove('open');
         let p = profiles[activeProfileName];
-        if(activeP.length > 0) { p.battleNum++; addLog("ПОБЕДА!"); playSnd(1200, 'sine', 0.5, 0.2); }
-        else { addLog("ПОРАЖЕНИЕ..."); playSnd(150, 'sawtooth', 0.5, 0.2); }
+    
+        if(activeP.length > 0) { 
+            p.battleNum++; 
+            addLog("ПОБЕДА!"); 
+            playSnd(1200, 'sine', 0.5, 0.2); 
+        } else { 
+            addLog("ПОРАЖЕНИЕ..."); 
+            playSnd(150, 'sawtooth', 0.5, 0.2); 
+        }
         
+        // Сохраняем выживших и ветеранов
         p.armyInv = activeP.map(u => {
-            if(u.data.xp >= 10) { u.data.level++; u.data.xp = 0; addLog("Юнит стал ВЕТЕРАНОМ!"); }
+            if(u.data.xp >= 10) { 
+                u.data.level++; 
+                u.data.xp = 0; 
+                addLog("Юнит стал ВЕТЕРАНОМ!"); 
+            }
             return u.data;
         });
         
+        // Очистка поля
         document.querySelectorAll('.unit, .drone-mini').forEach(u => u.remove());
-        activeP = []; activeE = []; save(); loadProfile();
+        activeP = []; activeE = []; 
+        save(); 
+        loadProfile();
+    
+        // ФИНАЛ ИГРЫ (ЭРА 3 + 50 БОЕВ)
         if (p.era === 3 && p.battleNum >= 50) {
             alert("ПОЗДРАВЛЯЕМ! ВЫ ПОКОРИЛИ ВСЕЛЕННУЮ С ПОМОЩЬЮ ТИТАНОВ!");
-            // Можно добавить редирект или салют
-    }    
-
+            
+            // ЭФФЕКТ САЛЮТА
+            for(let i=0; i<30; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.style.cssText = `
+                        position:absolute; left:${Math.random()*100}%; top:${Math.random()*100}%;
+                        width:10px; height:10px; background:hsl(${Math.random()*360}, 100%, 50%);
+                        border-radius:50%; box-shadow:0 0 20px white; z-index:10000;
+                        transition: transform 1s, opacity 1s; pointer-events:none;
+                    `;
+                    document.body.appendChild(firework);
+                    setTimeout(() => {
+                        firework.style.transform = "scale(15)";
+                        firework.style.opacity = "0";
+                        setTimeout(() => firework.remove(), 1000);
+                    }, 10);
+                }, i * 200);
+            }
+        }
     }
 
-    function addLog(m) { const l = document.getElementById('log'); l.innerHTML = `> ${m}<br>${l.innerHTML}`; }
+
+        function addLog(m) { const l = document.getElementById('log'); l.innerHTML = `> ${m}<br>${l.innerHTML}`; }
     function spawnMiniDrone(x, y, target) {
         const d = document.createElement('div'); d.className = 'drone-mini'; d.style.left = x + 'px'; d.style.top = y + 'px';
         document.getElementById('units-layer').appendChild(d);
@@ -508,19 +595,16 @@
         const p = document.createElement('div'); p.style.cssText = `position:absolute; left:${x}px; top:${y}px; color:red; font-weight:bold; animation: damagePop 0.8s forwards; z-index:5000;`;
         p.innerText = "-" + Math.floor(d); document.getElementById('field').appendChild(p); setTimeout(() => p.remove(), 800);
     }
-    function addMoney() { profiles[activeProfileName].money += (profiles[activeProfileName].lvl * 15); playSnd(900, 'sine', 0.1, 0.1); loadProfile(); }
-    function upgrade() { 
-        let p = profiles[activeProfileName]; 
-        if(p.money >= p.upCost && p.lvl < 10) { p.money -= p.upCost; p.lvl++; p.upCost *= 2; playSnd(500, 'triangle', 0.5, 0.2); save(); loadProfile(); } 
-    }
+    function addMoney() { profiles[activeProfileName].money += (profiles[activeProfileName].lvl * 15 * profiles[activeProfileName].era); playSnd(900, 'sine', 0.1, 0.1); loadProfile(); }
     function buy(t) { 
         let p = profiles[activeProfileName]; 
-        if(p.money >= config[t].cost) { p.money -= config[t].cost; p.armyInv.push({type:t, level:1, xp:0}); playSnd(1000, 'sine', 0.1, 0.1); save(); loadProfile(); } 
-    }
-    function checkEraTransfer() {
-        let p = profiles[activeProfileName];
-        if(p.bossDefeated) { p.era = 2; p.money += 20000; loadProfile(); save(); }
-        else alert("Победи БОССА-РОБОТА на 10-м бою!");
+        if(p.money >= config[t].cost) { 
+            p.money -= config[t].cost; 
+            p.armyInv.push({type:t, level:1, xp:0}); 
+            playSnd(1000, 'sine', 0.1, 0.1); 
+            if(config[t].scale > 3) addLog("ВЫПУЩЕН ТИТАН!"); // Бонусная фраза для гигантов
+            save(); loadProfile(); 
+        } 
     }
     function renderProfiles() {
         const list = document.getElementById('profile-list'); list.innerHTML = "";
@@ -531,31 +615,19 @@
         });
     }
     function createNewProfile() {
-        const n = prompt("Имя:");
+        const n = prompt("Имя лорда:");
         if(n) { createProfile(n); activeProfileName = n; renderProfiles(); loadProfile(); }
     }
     function deleteCurrentProfile() {
-        if(confirm("Удалить профиль?")) { delete profiles[activeProfileName]; location.reload(); }
-    }
-    function updateCastleGraphics(lvl, era) {
-        const ts1 = document.getElementById('ts1'), ts2 = document.getElementById('ts2'), tm = document.getElementById('tm');
-        const accent = era === 2 ? 'cyan' : '#ffc107';
-        const stoneGrad = era === 2 ? 'linear-gradient(to bottom, #263238, #455a64)' : 'linear-gradient(to bottom, #607d8b, #263238)';
-        ts1.style.height = (35 + lvl * 4) + '%';
-        ts2.style.height = (35 + lvl * 4) + '%';
-        tm.style.height = (65 + lvl * 3) + '%';
-        [ts1, ts2, tm].forEach(el => {
-            el.style.background = stoneGrad;
-            el.style.borderColor = accent;
-            if(era === 2) el.style.boxShadow = `0 0 ${lvl*3}px cyan`;
-        });
-        document.getElementById('main-dome').style.background = lvl >= 10 ? accent : '#455a64';
+        if(confirm("Удалить этот мир?")) { delete profiles[activeProfileName]; location.reload(); }
     }
 
     init();
 </script>
 </body>
 </html>
+
+
 
 
 
