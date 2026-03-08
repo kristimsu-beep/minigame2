@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Цитадель: Эволюция и Бой</title>
+    <title>Цитадель: Эволюция и Бой (FINAL)</title>
     <style>
         /* АНИМАЦИИ */
         @keyframes damagePop { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-50px); opacity: 0; } }
@@ -13,13 +13,12 @@
             --gold: #ffc107; --stone: #607d8b; --stone-drk: #263238; 
             --skin: #ffccbc; --neon: #00f2ff; 
         }
-        body { margin: 0; background: #1b5e20; font-family: 'Segoe UI', Tahoma, sans-serif; color: white; overflow: hidden; }
+        body { margin: 0; background: #1b5e20; font-family: 'Segoe UI', Tahoma, sans-serif; color: white; overflow: hidden; user-select: none; }
 
         /* ИНТЕРФЕЙС */
         #ui { 
             position: absolute; left: 0; top: 0; width: 320px; height: 100vh; background: #111; 
             padding: 20px; border-right: 4px solid var(--gold); z-index: 1000; box-sizing: border-box; overflow-y: auto;
-            transition: background 0.5s;
         }
         .stat { font-size: 19px; margin-bottom: 8px; color: var(--gold); font-weight: bold; }
         .era-tag { background: var(--gold); color: #000; padding: 4px 10px; border-radius: 4px; font-size: 13px; margin-bottom: 15px; display: inline-block; font-weight: bold; }
@@ -32,7 +31,7 @@
             font-weight: bold; text-transform: uppercase; transition: 0.2s;
         }
         .btn-grad:hover { transform: scale(1.02); filter: brightness(1.2); }
-        .btn-grad:disabled { opacity: 0.3; cursor: not-allowed; animation: none; }
+        .btn-grad:disabled { opacity: 0.3; cursor: not-allowed; }
         #battle-btn { background: linear-gradient(to bottom, #f44336, #b71c1c); font-size: 18px; margin-top: 15px; height: 55px; }
 
         /* ПРОФИЛИ */
@@ -55,15 +54,7 @@
         #gate.open { transform: translateX(-50%) scaleY(0.1); transform-origin: bottom; }
 
         /* ЮНИТЫ */
-            .unit { 
-            position: absolute; 
-            width: 50px; 
-            height: 80px; 
-            z-index: 200; 
-            transition: left 0.1s linear; 
-            transform-origin: bottom center; /* ДОБАВИТЬ ЭТО, чтобы Титаны стояли на земле */
-        }
-
+        .unit { position: absolute; width: 50px; height: 80px; z-index: 200; transition: left 0.1s linear; transform-origin: bottom center; }
         .h-body { width: 22px; height: 30px; border: 1.5px solid #000; position: absolute; top: 16px; left: 14px; border-radius: 4px; }
         .h-head { width: 16px; height: 16px; background: var(--skin); border-radius: 50%; position: absolute; top: 0; left: 17px; border: 1.5px solid #000; }
         .h-leg { width: 8px; height: 22px; background: #222; position: absolute; top: 46px; border-radius: 2px; transform-origin: top; }
@@ -79,37 +70,15 @@
         .w-ico { position: absolute; font-size: 24px; top: 10px; right: -15px; filter: drop-shadow(0 0 3px white); }
         .veteran::before { content: '⭐'; position: absolute; top: -45px; left: 18px; color: gold; font-size: 16px; }
 
-        .drone-mini { position: absolute; width: 12px; height: 8px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 8px var(--neon); z-index: 500; }
-        #log { position: absolute; bottom: 20px; right: 20px; width: 350px; height: 120px; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 15px; font-size: 13px; border-radius: 10px; overflow-y: auto; color: white; z-index: 3000; }
+        .drone-mini { position: absolute; width: 12px; height: 8px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 8px var(--neon); z-index: 500; transition: all 0.4s; }
+        #log { position: absolute; bottom: 20px; right: 20px; width: 350px; height: 120px; background: rgba(0,0,0,0.85); border: 2px solid var(--gold); padding: 15px; font-size: 13px; border-radius: 10px; overflow-y: auto; color: white; z-index: 3000; pointer-events: none; }
+        
         .meteor {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background: radial-gradient(circle, #ffeb3b, #f44336, #212121);
-            border-radius: 50%;
-            box-shadow: 0 0 20px #ff5722, 0 0 50px #ffc107;
-            pointer-events: none;
-            z-index: 6000;
-            transition: transform 0.5s linear, opacity 0.2s;
-        }
-        .meteor::after { /* Хвост метеорита */
-            content: '';
-            position: absolute;
-            top: -80px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 15px;
-            height: 100px;
-            background: linear-gradient(to bottom, transparent, #ff5722);
-            filter: blur(5px);
-        }
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            40% { transform: translate(3px, 2px) rotate(-1deg); }
-            100% { transform: translate(1px, -1px) rotate(0deg); }
+            position: absolute; width: 40px; height: 40px; background: radial-gradient(circle, #ffeb3b, #f44336, #212121);
+            border-radius: 50%; box-shadow: 0 0 20px #ff5722; pointer-events: none; z-index: 6000; transition: transform 0.5s linear;
         }
         .shake-anim { animation: shake 0.5s; }
+        @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-5px, 5px); } 75% { transform: translate(5px, -5px); } }
     </style>
 </head>
 <body>
@@ -123,8 +92,9 @@
 <div id="ui">
     <div id="era-tag" class="era-tag">ЭПОХА: СРЕДНЕВЕКОВЬЕ</div>
     <div class="stat">💰 ЗОЛОТО: <span id="money">0</span></div>
-    <div class="stat">🏰 ДВОРЕЦ: <span id="lvl">1</span>/10</div>
+    <div class="stat">🏰 ДВОРЕЦ: <span id="lvl">1</span>/20</div>
     <div class="stat">⚔️ БОЙ: <span id="battleNum">1</span></div>
+    <div id="meteor-timer-ui" style="color:red; font-weight:bold; margin-bottom:10px;">☄️ МЕТЕОР: ГОТОВ</div>
     
     <button class="btn-grad" onclick="addMoney()">💎 СОБРАТЬ НАЛОГИ</button>
     <button class="btn-grad" id="upBtn" onclick="upgrade()">🏛️ УЛУЧШИТЬ ДВОРЕЦ (<span id="upCost">50</span>)</button>
@@ -147,6 +117,7 @@
         <button class="btn-grad" onclick="buy('jet')" style="border-color:var(--neon)">✈️ Истребитель (50k)</button>
         <button class="btn-grad" onclick="buy('general')" style="border-color:var(--neon)">🎖️ Генерал Дронов (100k)</button>
     </div>
+
     <div id="shop-3" style="display:none;">
         <button class="btn-grad" onclick="buy('titan')" style="border-color:#ff5722">🗿 Титан (250k)</button>
         <button class="btn-grad" onclick="buy('fly_titan')" style="border-color:#ff5722">🦅 Летающий Титан (500k)</button>
@@ -154,7 +125,6 @@
         <button class="btn-grad" onclick="buy('drone_titan')" style="border-color:#ff5722">🛰️ Титан Дронов (5M)</button>
         <button class="btn-grad" onclick="buy('ultimate_titan')" style="border-color:#ff5722">🌌 ULTIMATE (10M)</button>
     </div>
-
 
     <button class="btn-grad" id="battle-btn" onclick="startBattle()">⚔️ В БОЙ!</button>
     <button id="era-btn" class="btn-grad" onclick="checkEraTransfer()" style="display:none; background:var(--neon); color:#000;">🚀 НОВАЯ ЭРА</button>
@@ -168,20 +138,13 @@
         <div class="tower t-side" id="ts2"></div>
     </div>
     <div id="units-layer"></div>
-    <div id="log">Система: Нанимайте войска!</div>
+    <div id="log">Система: Нанимайте войска! Пкм на поле - метеориты.</div>
 </div>
 
 <script>
+    const STORAGE_KEY = 'citadel_v11_final';
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playSnd(f, t, d, v) {
-        try {
-            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-            o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-            g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+d);
-            o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d);
-        } catch(e){}
-    }
-
+    
     const config = {
         sword: { ico: '⚔️', cost: 5, hp: 100, dmg: 35, color: '#1565c0' },
         mace: { ico: '🔨', cost: 25, hp: 130, dmg: 50, color: '#6d4c41' },
@@ -194,266 +157,129 @@
         heavy: { ico: '🔥', cost: 10000, hp: 50000, dmg: 4000, color: '#c62828', scale: 1.3 },
         tank: { ico: '📟', cost: 25000, hp: 120000, dmg: 9000, color: '#1b5e20', scale: 2.5 },
         jet: { ico: '✈️', cost: 50000, hp: 80000, dmg: 20000, color: '#37474f', scale: 2.8 },
-        general: { ico: '🎖️', cost: 100000, hp: 200000, dmg: 30000, color: '#1a237e', isGeneral: true }, // ДОБАВЬ ЗАПЯТУЮ ЗДЕСЬ
-        // ТРЕТЬЯ ЭРА - ТИТАНЫ
+        general: { ico: '🎖️', cost: 100000, hp: 200000, dmg: 30000, color: '#1a237e', isGeneral: true },
         titan: { ico: '🗿', cost: 250000, hp: 500000, dmg: 50000, color: '#424242', scale: 3.5 },
         fly_titan: { ico: '🦅', cost: 500000, hp: 800000, dmg: 80000, color: '#1a237e', scale: 3.8 },
         mecha_titan: { ico: '🤖', cost: 1000000, hp: 2000000, dmg: 150000, color: '#006064', scale: 4.2 },
         drone_titan: { ico: '🛰️', cost: 5000000, hp: 5000000, dmg: 300000, color: '#311b92', isGeneral: true, scale: 4.5 },
         ultimate_titan: { ico: '🌌', cost: 10000000, hp: 15000000, dmg: 1000000, color: '#000', scale: 5.5 }
-
     };
 
     let activeProfileName = "", profiles = {}, inBattle = false, activeP = [], activeE = [], battleLoop, isNight = false;
-    const STORAGE_KEY = 'citadel_v10_final';
-        let meteorTimer = 0;
-    const METEOR_COOLDOWN = 30;
+    let meteorTimer = 0; const METEOR_COOLDOWN = 15;
 
-    // Слушаем правый клик по всему полю боя
-    window.oncontextmenu = (e) => {
-        e.preventDefault(); // Отключаем стандартное меню браузера
-        spawnMeteorShower(e.clientX, e.clientY);
-    };
+    function playSnd(f, t, d, v) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        try {
+            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+            o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+            g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+d);
+            o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d);
+        } catch(e){}
+    }
 
-    function spawnMeteorShower(targetX, targetY) {
-        if (meteorTimer > 0) {
-            addLog(`Метеориты на перезарядке: ${meteorTimer}с`);
-            return;
-        }
+    window.oncontextmenu = (e) => { e.preventDefault(); spawnMeteorShower(e.clientX, e.clientY); };
 
+    function spawnMeteorShower(tx, ty) {
+        if (meteorTimer > 0) { addLog(`Перезарядка: ${meteorTimer}с`); return; }
         meteorTimer = METEOR_COOLDOWN;
-        addLog("ВЫЗВАН МЕТЕОРИТНЫЙ ДОЖДЬ!");
-        playSnd(80, 'sawtooth', 2, 0.4); // Низкий гул начала атаки
-
-        // Запускаем 6 метеоритов с небольшим разбросом
-        for (let i = 0; i < 6; i++) {
-            setTimeout(() => {
-                const rx = targetX + (Math.random() * 160 - 80);
-                const ry = targetY + (Math.random() * 160 - 80);
-                createMeteorEffect(rx, ry);
-            }, i * 250);
-        }
-
-        // Таймер отсчета перезарядки
-        const cd = setInterval(() => {
-            meteorTimer--;
-            if (meteorTimer <= 0) clearInterval(cd);
-        }, 1000);
-    }
-
-    function createMeteorEffect(tx, ty) {
-    const m = document.createElement('div');
-    m.className = 'meteor';
-    
-    // 1. Точка появления: высоко в небе и чуть правее цели (для полета по диагонали)
-    const fallDistanceY = 800; // Высота падения
-    const fallDistanceX = 400; // Смещение по горизонтали
-    
-    const startX = tx + fallDistanceX;
-    const startY = ty - fallDistanceY;
-    
-    m.style.left = startX + 'px';
-    m.style.top = startY + 'px';
-    document.body.appendChild(m);
-
-    // 2. Эффект взрывной волны (огненное кольцо)
-    function spawnRing(x, y) {
-        const ring = document.createElement('div');
-        ring.style.cssText = `
-            position:absolute; left:${x-20}px; top:${y-20}px; 
-            width:40px; height:40px; border:4px solid orange; 
-            border-radius:50%; pointer-events:none; z-index:5000;
-            transition: all 0.5s ease-out; opacity:1;
-        `;
-        document.body.appendChild(ring);
-        setTimeout(() => {
-            ring.style.transform = "scale(8)";
-            ring.style.opacity = "0";
-            ring.style.borderColor = "red";
-            setTimeout(() => ring.remove(), 500);
-        }, 10);
-    }
-
-    // Запуск анимации
-    setTimeout(() => {
-        // 3. ТЕПЕРЬ ПРАВИЛЬНО: Летим ровно в точку (tx, ty)
-        // Мы смещаемся ровно на столько, на сколько отошли при спавне
-        m.style.transform = `translate(-${fallDistanceX}px, ${fallDistanceY}px)`;
         
+        const m = document.createElement('div'); m.className = 'meteor';
+        m.style.left = tx + 'px'; m.style.top = '-50px';
+        document.body.appendChild(m);
+
+        setTimeout(() => { m.style.transform = `translateY(${ty + 50}px)`; }, 10);
+
         setTimeout(() => {
-            // Тряска экрана
             const field = document.getElementById('field');
-            field.classList.add('shake-anim');
-            setTimeout(() => field.classList.remove('shake-anim'), 500);
+            field.classList.add('shake-anim'); setTimeout(() => field.classList.remove('shake-anim'), 500);
+            playSnd(60, 'sine', 0.8, 0.5);
 
-            // Визуальный взрыв (кольцо)
-            spawnRing(tx, ty);
-
-            // Звук взрыва
-            playSnd(50 + Math.random() * 30, 'sine', 0.8, 0.5);
-
-            // Урон врагам
             activeE.forEach(e => {
-                const targetXInField = tx - 320; 
-                const dx = e.x - targetXInField;
-                const dy = e.y - ty;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-            
-                if (dist < 200) { // Чуть увеличили радиус
-                    const dmg = 8000 * (profiles[activeProfileName].era || 1);
-                    e.hp -= dmg;
-                    spawnDamage(e.x, e.y, dmg);
-                    updateHP(e);
+                let dx = e.x - (tx - 320);
+                if (Math.abs(dx) < 150) {
+                    const dmg = 10000 * (profiles[activeProfileName].era || 1);
+                    e.hp -= dmg; spawnDamage(e.x, e.y, dmg); updateHP(e);
                 }
             });
-
-            m.style.opacity = '0';
-            setTimeout(() => m.remove(), 200);
-        }, 500); 
-    }, 20);
-}
-
-
+            m.style.opacity = '0'; setTimeout(() => m.remove(), 200);
+        }, 510);
+    }
 
     function init() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if(saved) profiles = JSON.parse(saved);
         if(!Object.keys(profiles).length) createProfile("Лорд");
         activeProfileName = Object.keys(profiles)[0];
+        
+        // Фоновый таймер метеоритов
+        setInterval(() => {
+            if(meteorTimer > 0) {
+                meteorTimer--;
+                document.getElementById('meteor-timer-ui').innerText = `☄️ МЕТЕОР: ${meteorTimer}с`;
+            } else {
+                document.getElementById('meteor-timer-ui').innerText = `☄️ МЕТЕОР: ГОТОВ`;
+            }
+        }, 1000);
+
         renderProfiles(); loadProfile();
     }
 
     function createProfile(name) {
         profiles[name] = { money: 100, lvl: 1, upCost: 50, armyInv: [], battleNum: 1, era: 1, bossDefeated: false };
+        save();
     }
 
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles)); }
 
-   function loadProfile() {
-    const p = profiles[activeProfileName];
-    // Обязательно оставь эти строки, чтобы цифры в меню обновлялись:
-    document.getElementById('money').innerText = Math.floor(p.money);
-    document.getElementById('lvl').innerText = p.lvl;
-    document.getElementById('upCost').innerText = Math.floor(p.upCost);
-    document.getElementById('battleNum').innerText = p.battleNum;
-    document.getElementById('era-tag').innerText = `ЭПОХА: ${p.era === 1 ? 'СРЕДНЕВЕКОВЬЕ' : (p.era === 2 ? 'МОДЕРН' : 'КОСМОС')}`;
-    
-    // Управление магазинами
-    document.getElementById('shop-1').style.display = p.era === 1 ? 'block' : 'none';
-    document.getElementById('shop-2').style.display = p.era === 2 ? 'block' : 'none';
-    document.getElementById('shop-3').style.display = p.era === 3 ? 'block' : 'none';
+    function loadProfile() {
+        const p = profiles[activeProfileName];
+        document.getElementById('money').innerText = Math.floor(p.money);
+        document.getElementById('lvl').innerText = p.lvl;
+        document.getElementById('upCost').innerText = Math.floor(p.upCost);
+        document.getElementById('battleNum').innerText = p.battleNum;
+        document.getElementById('era-tag').innerText = `ЭПОХА: ${['','СРЕДНЕВЕКОВЬЕ','МОДЕРН','КОСМОС'][p.era]}`;
+        
+        ['shop-1', 'shop-2', 'shop-3'].forEach((s, i) => document.getElementById(s).style.display = (p.era === i+1 ? 'block' : 'none'));
 
-    // Условие появления кнопки новой эры
-    const canGoToEra2 = p.era === 1 && p.lvl >= 10;
-    const canGoToEra3 = p.era === 2 && p.lvl >= 20 && p.bossDefeated;
-    
-    const eraBtn = document.getElementById('era-btn');
-    if (canGoToEra2 || canGoToEra3) {
-        eraBtn.style.display = 'block';
-        eraBtn.innerText = p.era === 1 ? "🚀 В МОДЕРН" : "🌌 В КОСМОС";
-    } else {
-        eraBtn.style.display = 'none';
+        const eraBtn = document.getElementById('era-btn');
+        if ((p.era === 1 && p.lvl >= 10 && p.bossDefeated) || (p.era === 2 && p.lvl >= 20 && p.bossDefeated)) {
+            eraBtn.style.display = 'block';
+            eraBtn.innerText = p.era === 1 ? "🚀 В МОДЕРН" : "🌌 В КОСМОС";
+        } else { eraBtn.style.display = 'none'; }
+
+        updateCastleGraphics(p.lvl, p.era);
     }
 
-    updateCastleGraphics(p.lvl, p.era);
-}
-
-    
-        function upgrade() { 
+    function upgrade() { 
         let p = profiles[activeProfileName]; 
         let maxLvl = p.era === 1 ? 10 : 20; 
         if(p.money >= p.upCost && p.lvl < maxLvl) { 
-            p.money -= p.upCost; 
-            p.lvl++; 
-            p.upCost *= 1.8; 
-            playSnd(500, 'triangle', 0.5, 0.2);
-            save(); 
-            loadProfile(); 
-        } else if (p.lvl >= maxLvl) {
-            addLog("Дворец на максимуме для этой эры!");
-        }
+            p.money -= p.upCost; p.lvl++; p.upCost *= 1.8; 
+            playSnd(500, 'triangle', 0.5, 0.2); save(); loadProfile(); 
+        } else if (p.lvl >= maxLvl) { addLog("Максимум эры достигнут!"); }
     }
-    
+
     function updateCastleGraphics(lvl, era) {
         const ts1 = document.getElementById('ts1'), ts2 = document.getElementById('ts2'), tm = document.getElementById('tm');
-        
         let color = era === 1 ? '#ffc107' : (era === 2 ? 'cyan' : '#ff00ff');
-        
-        // Кирпичный градиент для заливки
-        const brickGrad = `repeating-linear-gradient(
-            45deg,
-            #455a64,
-            #455a64 10px,
-            #37474f 10px,
-            #37474f 20px
-        )`;
-
-        // Высота (в %)
-        ts1.style.height = (35 + lvl * 4) + '%';
-        ts2.style.height = (35 + lvl * 4) + '%';
-        tm.style.height = (65 + lvl * 3) + '%';
-        
-        // Ширина (в px)
-        ts1.style.width = (60 + lvl * 2) + 'px';
-        ts2.style.width = (60 + lvl * 2) + 'px';
-        tm.style.width = (150 + lvl * 5) + 'px';
+        const brick = `repeating-linear-gradient(45deg, #455a64, #455a64 10px, #37474f 10px, #37474f 20px)`;
 
         [ts1, ts2, tm].forEach(el => {
-            el.style.background = brickGrad; 
-            el.style.borderColor = color;
-            el.style.boxShadow = `0 0 ${lvl * 5}px ${color}, inset 0 0 15px rgba(0,0,0,0.5)`;
-            if(era === 3) el.style.filter = "hue-rotate(45deg) brightness(1.2) contrast(1.2)";
+            el.style.background = brick; el.style.borderColor = color;
+            el.style.boxShadow = `0 0 ${lvl * 3}px ${color}`;
         });
-        
         document.getElementById('main-dome').style.background = lvl >= 10 ? color : '#455a64';
     }
 
-    function toggleNight() {
-        isNight = !isNight;
-        const field = document.getElementById('field');
-        const ui = document.getElementById('ui');
-        if(isNight) {
-            field.style.filter = "brightness(0.4) contrast(1.2) hue-rotate(50deg)";
-            ui.style.background = "#050505";
-        } else {
-            field.style.filter = "none";
-            ui.style.background = "#111";
-        }
-    }
-
-    }
-
-    function createUnit(u, isE, isB = false) {
-        const d = document.createElement('div');
-        d.className = 'unit' + (isE ? ' enemy' : '') + (u.level > 1 ? ' veteran' : '');
-        let char = config[u.type] || { ico: isB?'🤖':'💀', hp: 300 * (profiles[activeProfileName].battleNum + profiles[activeProfileName].era*5), dmg: 100, color: isB?'#000':'#b71c1c' };
-        const s = isB ? 3.5 : (char.scale || 1);
-        const xpW = Math.min(100, (u.xp || 0) * 10);
-
-        d.innerHTML = `
-            <div class="hp-bar"><div class="hp-fill"></div></div>
-            ${!isE ? `<div class="xp-bar"><div class="xp-fill" style="width:${xpW}%"></div></div>` : ''}
-            <div class="h-head"></div><div class="h-body" style="background:${char.color}"></div>
-            <div class="h-leg l"></div><div class="h-leg r"></div>
-            <div class="w-ico">${char.ico}</div>
-        `;
-        d.style.left = (isE ? window.innerWidth - 450 : 350) + 'px';
-        d.style.top = (150 + Math.random() * 300) + 'px';
-        d.style.transform = `scale(${s}) ${isE ? 'scaleX(-1)' : ''}`;
-        document.getElementById('units-layer').appendChild(d);
-        
-        return { dom: d, type: u.type, hp: char.hp, maxHp: char.hp, data: u, x: isE ? window.innerWidth-450 : 350, y: parseInt(d.style.top), dmg: char.dmg, isB, isGeneral: char.isGeneral };
-    }
-
-     function startBattle() {
+    function startBattle() {
         let p = profiles[activeProfileName];
         if (inBattle || !p.armyInv.length) return;
         inBattle = true; 
         document.getElementById('gate').classList.add('open');
         activeP = p.armyInv.map(u => createUnit(u, false));
         
-        // Сложность врагов зависит от боя и эры
-        let isBoss = (p.battleNum % 10 === 0);
+        let isBoss = (p.battleNum % 5 === 0);
         for(let i=0; i < p.battleNum + 2; i++) activeE.push(createUnit({type:'enemy'}, true));
         if(isBoss) activeE.push(createUnit({type:'boss'}, true, true));
 
@@ -462,209 +288,133 @@
 
             activeP.forEach(u => {
                 let target = activeE[0];
-                if (target && u.x < target.x - 80) { 
-                    u.x += 12; u.dom.classList.add('walking'); 
-                } 
+                if (target && u.x < target.x - 80) { u.x += 12; u.dom.classList.add('walking'); } 
                 else if(target) { 
                     u.dom.classList.remove('walking'); 
-                    
-                    // МАССОВАЯ АТАКА (Добавлены все Титаны и тяжелая техника)
-                    const massUnits = ['giant', 'iron_guard', 'armored_car', 'soldier', 'heavy', 'tank', 'jet', 'general', 'titan', 'fly_titan', 'mecha_titan', 'drone_titan', 'ultimate_titan'];
-                    if(massUnits.includes(u.type)) {
-                        let count = Math.floor(Math.random() * 21) + 5; // Бьем от 5 до 25 врагов
-                        for(let i=0; i<count && i<activeE.length; i++) {
-                            activeE[i].hp -= u.dmg/10; 
-                            updateHP(activeE[i]);
-                        }
-                    } else {
-                        target.hp -= u.dmg/10; 
-                        updateHP(target); 
-                    }
-
+                    target.hp -= u.dmg/5; updateHP(target); 
                     if(u.isGeneral && Math.random() > 0.9) spawnMiniDrone(u.x, u.y, target);
-                    if(Math.random() > 0.95) spawnDamage(target.x, target.y, u.dmg/10);
+                    if(Math.random() > 0.9) spawnDamage(target.x, target.y, u.dmg/5);
                 }
-                u.dom.style.left = u.x + 'px'; 
-                u.dom.style.zIndex = Math.floor(u.y);
+                u.dom.style.left = u.x + 'px';
             });
 
             activeE.forEach(e => {
                 let target = activeP[0];
-                if (target && e.x > target.x + 80) { e.x -= 10; e.dom.classList.add('walking'); } 
-                else if(target) { e.dom.classList.remove('walking'); target.hp -= e.dmg/10; updateHP(target); }
-                e.dom.style.left = e.x + 'px'; e.dom.style.zIndex = Math.floor(e.y);
+                if (target && e.x > target.x + 80) { e.x -= 8; e.dom.classList.add('walking'); } 
+                else if(target) { e.dom.classList.remove('walking'); target.hp -= e.dmg/5; updateHP(target); }
+                e.dom.style.left = e.x + 'px';
             });
 
-            activeP = activeP.filter(u => u.hp > 0 || (u.dom.remove() && false));
+            activeP = activeP.filter(u => u.hp > 0 || (u.dom.remove() || false));
             activeE = activeE.filter(e => {
                 if(e.hp <= 0) {
                     e.dom.remove(); 
-                    profiles[activeProfileName].money += (e.isB ? 3000 * p.era : 50 * p.era);
+                    profiles[activeProfileName].money += (e.isB ? 5000 : 100) * p.era;
                     if(e.isB) profiles[activeProfileName].bossDefeated = true;
-                    activeP.forEach(pU => { 
-                        pU.data.xp = Math.min(10, (pU.data.xp||0) + 1);
-                        const fill = pU.dom.querySelector('.xp-fill');
-                        if(fill) fill.style.width = (pU.data.xp*10)+'%';
-                    });
+                    activeP.forEach(pU => { pU.data.xp = Math.min(10, (pU.data.xp||0) + 1); });
                     loadProfile(); return false;
                 } return true;
             });
         }, 100);
     }
 
-    function upgrade() { 
-        let p = profiles[activeProfileName]; 
-        // Лимит 10 для 1 эры, 20 для остальных
-        let maxLvl = p.era === 1 ? 10 : 20; 
-        if(p.money >= p.upCost && p.lvl < maxLvl) { 
-            p.money -= p.upCost; 
-            p.lvl++; 
-            p.upCost *= 1.8; 
-            playSnd(500, 'triangle', 0.5, 0.2); 
-            save(); 
-            loadProfile(); 
-        } else if (p.lvl >= maxLvl) {
-            addLog("Дворец достиг максимума для этой эры!");
-        }
-    }
-
-    function checkEraTransfer() {
-        let p = profiles[activeProfileName];
-        // Переход 1 -> 2
-        if (p.era === 1 && p.lvl >= 10 && p.bossDefeated) {
-            p.era = 2; 
-            p.money += 20000; 
-            p.bossDefeated = false; // Сброс для следующего этапа
-            addLog("ЭПОХА МОДЕРНА ДОСТИГНУТА!");
-            playSnd(800, 'sine', 1, 0.3);
-        } 
-        // Переход 2 -> 3
-        else if (p.era === 2 && p.lvl >= 20 && p.bossDefeated) {
-            p.era = 3; 
-            p.money += 100000; 
-            addLog("ДОБРО ПОЖАЛОВАТЬ В КОСМОС (ЭРА ТИТАНОВ)!");
-            playSnd(1500, 'sine', 1.5, 0.4);
-        } else {
-            alert("Нужен макс. уровень дворца и победа над БОССОМ этой эры (каждый 10-й бой)!");
-        }
-        save(); 
-        loadProfile();
-    }
-
-
     function endBattle() {
-        clearInterval(battleLoop);
-        inBattle = false; 
+        clearInterval(battleLoop); inBattle = false;
         document.getElementById('gate').classList.remove('open');
         let p = profiles[activeProfileName];
-    
-        if(activeP.length > 0) { 
-            p.battleNum++; 
-            addLog("ПОБЕДА!"); 
-            playSnd(1200, 'sine', 0.5, 0.2); 
-        } else { 
-            addLog("ПОРАЖЕНИЕ..."); 
-            playSnd(150, 'sawtooth', 0.5, 0.2); 
-        }
+        if(activeP.length > 0) { p.battleNum++; addLog("ПОБЕДА!"); playSnd(1000, 'sine', 0.5, 0.2); } 
+        else { addLog("ПОРАЖЕНИЕ..."); playSnd(100, 'sawtooth', 0.5, 0.2); }
         
-        // Сохраняем выживших и ветеранов
         p.armyInv = activeP.map(u => {
-            if(u.data.xp >= 10) { 
-                u.data.level++; 
-                u.data.xp = 0; 
-                addLog("Юнит стал ВЕТЕРАНОМ!"); 
-            }
+            if(u.data.xp >= 10) { u.data.level++; u.data.xp = 0; addLog("Юнит стал ВЕТЕРАНОМ!"); }
             return u.data;
         });
         
-        // Очистка поля
         document.querySelectorAll('.unit, .drone-mini').forEach(u => u.remove());
-        activeP = []; activeE = []; 
-        save(); 
-        loadProfile();
-    
-        // ФИНАЛ ИГРЫ (ЭРА 3 + 50 БОЕВ)
-        if (p.era === 3 && p.battleNum >= 50) {
-            alert("ПОЗДРАВЛЯЕМ! ВЫ ПОКОРИЛИ ВСЕЛЕННУЮ С ПОМОЩЬЮ ТИТАНОВ!");
-            
-            // ЭФФЕКТ САЛЮТА
-            for(let i=0; i<30; i++) {
-                setTimeout(() => {
-                    const firework = document.createElement('div');
-                    firework.style.cssText = `
-                        position:absolute; left:${Math.random()*100}%; top:${Math.random()*100}%;
-                        width:10px; height:10px; background:hsl(${Math.random()*360}, 100%, 50%);
-                        border-radius:50%; box-shadow:0 0 20px white; z-index:10000;
-                        transition: transform 1s, opacity 1s; pointer-events:none;
-                    `;
-                    document.body.appendChild(firework);
-                    setTimeout(() => {
-                        firework.style.transform = "scale(15)";
-                        firework.style.opacity = "0";
-                        setTimeout(() => firework.remove(), 1000);
-                    }, 10);
-                }, i * 200);
-            }
-        }
+        activeP = []; activeE = []; save(); loadProfile();
     }
 
-
-        function addLog(m) { const l = document.getElementById('log'); l.innerHTML = `> ${m}<br>${l.innerHTML}`; }
-    function spawnMiniDrone(x, y, target) {
-        const d = document.createElement('div'); d.className = 'drone-mini'; d.style.left = x + 'px'; d.style.top = y + 'px';
+    function createUnit(u, isE, isB = false) {
+        const d = document.createElement('div');
+        d.className = 'unit' + (isE ? ' enemy' : '') + (u.level > 1 ? ' veteran' : '');
+        let char = config[u.type] || { ico: isB?'👹':'💀', hp: 200 * (profiles[activeProfileName].battleNum), dmg: 50, color: '#b71c1c' };
+        const s = isB ? 3.5 : (char.scale || 1);
+        d.innerHTML = `<div class="hp-bar"><div class="hp-fill"></div></div><div class="h-head"></div><div class="h-body" style="background:${char.color}"></div><div class="h-leg l"></div><div class="h-leg r"></div><div class="w-ico">${char.ico}</div>`;
+        d.style.left = (isE ? window.innerWidth - 450 : 350) + 'px';
+        d.style.top = (150 + Math.random() * 300) + 'px';
+        d.style.transform = `scale(${s}) ${isE ? 'scaleX(-1)' : ''}`;
         document.getElementById('units-layer').appendChild(d);
-        setTimeout(() => { if(target) target.hp -= 1000; d.remove(); }, 400);
+        return { dom: d, type: u.type, hp: char.hp, maxHp: char.hp, data: u, x: isE ? window.innerWidth-450 : 350, y: parseInt(d.style.top), dmg: char.dmg, isB, isGeneral: char.isGeneral };
     }
+
+    function addLog(m) { const l = document.getElementById('log'); l.innerHTML = `> ${m}<br>${l.innerHTML}`; }
     function updateHP(u) { if(u.dom) u.dom.querySelector('.hp-fill').style.width = (u.hp/u.maxHp*100)+'%'; }
     function spawnDamage(x, y, d) {
         const p = document.createElement('div'); p.style.cssText = `position:absolute; left:${x}px; top:${y}px; color:red; font-weight:bold; animation: damagePop 0.8s forwards; z-index:5000;`;
         p.innerText = "-" + Math.floor(d); document.getElementById('field').appendChild(p); setTimeout(() => p.remove(), 800);
     }
-    function addMoney() { profiles[activeProfileName].money += (profiles[activeProfileName].lvl * 15 * profiles[activeProfileName].era); playSnd(900, 'sine', 0.1, 0.1); loadProfile(); }
+    function spawnMiniDrone(x, y, target) {
+        const d = document.createElement('div'); d.className = 'drone-mini'; d.style.left = x + 'px'; d.style.top = y + 'px';
+        document.getElementById('units-layer').appendChild(d);
+        setTimeout(() => { if(target) target.hp -= 2000; d.remove(); }, 400);
+    }
+    function addMoney() { 
+        let p = profiles[activeProfileName];
+        p.money += (p.lvl * 20 * p.era); playSnd(900, 'sine', 0.1, 0.1); loadProfile(); 
+    }
     function buy(t) { 
         let p = profiles[activeProfileName]; 
         if(p.money >= config[t].cost) { 
-            p.money -= config[t].cost; 
-            p.armyInv.push({type:t, level:1, xp:0}); 
-            playSnd(1000, 'sine', 0.1, 0.1); 
-            if(config[t].scale > 3) addLog("ВЫПУЩЕН ТИТАН!"); // Бонусная фраза для гигантов
-            save(); loadProfile(); 
-        } 
+            p.money -= config[t].cost; p.armyInv.push({type:t, level:1, xp:0}); 
+            playSnd(1000, 'sine', 0.1, 0.1); save(); loadProfile(); 
+        } else { alert("Недостаточно золота!"); }
+    }
+    function toggleNight() {
+        isNight = !isNight;
+        document.getElementById('field').style.filter = isNight ? "brightness(0.4) contrast(1.2) hue-rotate(50deg)" : "none";
+    }
+    function createNewProfile() {
+        const n = prompt("Имя:"); if(n) { createProfile(n); activeProfileName = n; renderProfiles(); loadProfile(); }
     }
     function renderProfiles() {
         const list = document.getElementById('profile-list'); list.innerHTML = "";
         Object.keys(profiles).forEach(n => {
-            const b = document.createElement('button'); b.className = `profile-btn ${n===activeProfileName?'active':''}`;
-            b.innerText = n; b.onclick = () => { if(!inBattle){ activeProfileName=n; renderProfiles(); loadProfile(); } };
-            list.appendChild(b);
-        });
-    }
-    function createNewProfile() {
-        const n = prompt("Имя лорда:");
-        if(n) { createProfile(n); activeProfileName = n; renderProfiles(); loadProfile(); }
-    }
+                        const b = document.createElement('button'); 
+                        b.className = `profile-btn ${n===activeProfileName?'active':''}`;
+                        b.innerText = n; 
+                        b.onclick = () => { if(!inBattle){ activeProfileName=n; renderProfiles(); loadProfile(); } };
+                        list.appendChild(b);
+                    });
+                }
+
     function deleteCurrentProfile() {
-    // Проверка, чтобы не удалить последний профиль
-    if(Object.keys(profiles).length <= 1) {
-        alert("Нельзя удалить единственный мир! Создайте новый, прежде чем удалять этот.");
-        return;
+        if(Object.keys(profiles).length <= 1) {
+            alert("Создайте новый профиль перед удалением!"); return;
+        }
+        if(confirm("Удалить этот мир навсегда?")) { 
+            delete profiles[activeProfileName];
+            activeProfileName = Object.keys(profiles)[0];
+            save(); renderProfiles(); loadProfile();
+        }
     }
-    
-    if(confirm("Удалить этот мир навсегда?")) { 
-        delete profiles[activeProfileName]; // Удаляем из объекта
-        save(); // ВАЖНО: сохраняем обновленный список (без этого профиля) в localStorage
-        location.reload(); // Перезагружаем страницу
+
+    function checkEraTransfer() {
+        let p = profiles[activeProfileName];
+        if (p.era === 1 && p.lvl >= 10 && p.bossDefeated) {
+            p.era = 2; p.lvl = 1; p.money += 20000; p.bossDefeated = false;
+            addLog("ДОБРО ПОЖАЛОВАТЬ В МОДЕРН!");
+        } else if (p.era === 2 && p.lvl >= 20 && p.bossDefeated) {
+            p.era = 3; p.lvl = 1; p.money += 100000;
+            addLog("ЭПОХА ТИТАНОВ НАСТАЛА!");
+        } else {
+            alert("Нужен максимальный уровень дворца этой эры и победа над БОССОМ!");
+        }
+        save(); loadProfile();
     }
-}
 
-
+    // Запуск игры
     init();
 </script>
 </body>
 </html>
-
-
-
-
-
 
