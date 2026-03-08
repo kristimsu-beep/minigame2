@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Цитадель: Эволюция и Бой — FULL EDITION</title>
     <style>
-        /* АНИМАЦИИ И ЭФФЕКТЫ */
+        /* АНИМАЦИИ */
         @keyframes damagePop { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
         @keyframes step { from { transform: rotate(-25deg); } to { transform: rotate(25deg); } }
         @keyframes gradient-anim { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
@@ -15,7 +15,7 @@
         :root { --gold: #ffc107; --stone: #607d8b; --stone-drk: #263238; --skin: #ffccbc; --neon: #00f2ff; }
         body { margin: 0; background: #1b5e20; font-family: 'Segoe UI', Tahoma, sans-serif; color: white; overflow: hidden; user-select: none; }
 
-        /* ИНТЕРФЕЙС (UI) */
+        /* ИНТЕРФЕЙС */
         #ui { position: absolute; left: 0; top: 0; width: 320px; height: 100vh; background: #111; padding: 20px; border-right: 4px solid var(--gold); z-index: 1000; box-sizing: border-box; overflow-y: auto; }
         .stat { font-size: 19px; margin-bottom: 8px; color: var(--gold); font-weight: bold; }
         .era-tag { background: var(--gold); color: #000; padding: 4px 10px; border-radius: 4px; font-size: 13px; margin-bottom: 15px; display: inline-block; font-weight: bold; }
@@ -39,7 +39,7 @@
         #gate { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 70px; height: 90px; background: #3e2723; border: 2px solid var(--gold); border-radius: 35px 35px 0 0; z-index: 5; }
 
         /* ЮНИТЫ */
-        .unit { position: absolute; width: 50px; height: 80px; z-index: 200; transition: left 0.1s linear; transform-origin: bottom center; }
+        .unit { position: absolute; width: 50px; height: 80px; z-index: 200; transform-origin: bottom center; }
         .h-body { width: 22px; height: 30px; border: 1.5px solid #000; position: absolute; top: 16px; left: 14px; border-radius: 4px; }
         .h-head { width: 16px; height: 16px; background: var(--skin); border-radius: 50%; position: absolute; top: 0; left: 17px; border: 1.5px solid #000; }
         .h-leg { width: 8px; height: 22px; background: #222; position: absolute; top: 46px; border-radius: 2px; }
@@ -47,7 +47,7 @@
         .walking .l { animation: step 0.3s infinite alternate; }
         .walking .r { animation: step 0.3s infinite alternate-reverse; }
         .hp-bar { position: absolute; top: -15px; width: 100%; height: 5px; background: #000; border: 1px solid #fff; }
-        .hp-fill { height: 100%; background: #4caf50; width: 100%; transition: width 0.2s; }
+        .hp-fill { height: 100%; background: #4caf50; width: 100%; transition: width 0.1s; }
         .w-ico { position: absolute; font-size: 24px; top: 10px; right: -15px; filter: drop-shadow(0 0 3px white); }
 
         /* СПЕЦЭФФЕКТЫ */
@@ -85,23 +85,24 @@
     </div>
 
     <div id="shop-2" style="display:none;">
-        <button class="btn-grad" onclick="buy('soldier')">🔫 Автоматчик (5k)</button>
-        <button class="btn-grad" onclick="buy('heavy')">🔥 Миниганер (10k)</button>
-        <button class="btn-grad" onclick="buy('tank')">📟 Танк (25k)</button>
-        <button class="btn-grad" onclick="buy('jet')">✈️ Истребитель (50k)</button>
-        <button class="btn-grad" onclick="buy('general')">🎖️ Генерал (100k)</button>
+        <button class="btn-grad" onclick="buy('soldier')" style="border-color:var(--neon)">🔫 Автоматчик (5k)</button>
+        <button class="btn-grad" onclick="buy('heavy')" style="border-color:var(--neon)">🔥 Миниганер (10k)</button>
+        <button class="btn-grad" onclick="buy('tank')" style="border-color:var(--neon)">📟 Танк (25k)</button>
+        <button class="btn-grad" onclick="buy('jet')" style="border-color:var(--neon)">✈️ Истребитель (50k)</button>
+        <button class="btn-grad" onclick="buy('general')" style="border-color:var(--neon)">🎖️ Генерал (100k)</button>
     </div>
 
     <div id="shop-3" style="display:none;">
-        <button class="btn-grad" onclick="buy('titan')">🗿 Титан (250k)</button>
-        <button class="btn-grad" onclick="buy('fly_titan')">🦅 Летающий (500k)</button>
-        <button class="btn-grad" onclick="buy('mecha_titan')">🤖 Меха-Титан (1M)</button>
-        <button class="btn-grad" onclick="buy('drone_titan')">🛰️ Титан Дронов (5M)</button>
-        <button class="btn-grad" onclick="buy('ultimate_titan')">🌌 ULTIMATE (10M)</button>
+        <button class="btn-grad" onclick="buy('titan')" style="border-color:#ff5722">🗿 Титан (250k)</button>
+        <button class="btn-grad" onclick="buy('fly_titan')" style="border-color:#ff5722">🦅 Летающий (500k)</button>
+        <button class="btn-grad" onclick="buy('mecha_titan')" style="border-color:#ff5722">🤖 Меха-Титан (1M)</button>
+        <button class="btn-grad" onclick="buy('drone_titan')" style="border-color:#ff5722">🛰️ Титан Дронов (5M)</button>
+        <button class="btn-grad" onclick="buy('ultimate_titan')" style="border-color:#ff5722">🌌 ULTIMATE (10M)</button>
     </div>
 
     <button class="btn-grad" id="battle-btn" onclick="startBattle()">⚔️ В БОЙ!</button>
     <button id="era-btn" class="btn-grad" onclick="checkEraTransfer()" style="display:none; background:var(--neon); color:#000;">🚀 НОВАЯ ЭРА</button>
+    <button class="btn-grad" onclick="deleteCurrentProfile()" style="background:#222; color:#ff5252; margin-top:20px; font-size:10px; border-color:red;">❌ УДАЛИТЬ ПРОФИЛЬ</button>
 </div>
 
 <div id="field">
@@ -111,7 +112,7 @@
         <div class="tower t-side" id="ts2"></div>
     </div>
     <div id="units-layer"></div>
-    <div id="log">Добро пожаловать! Соберите армию. Пкм - Метеориты.</div>
+    <div id="log">Цитадель готова. Наймите армию и нажмите "В БОЙ!".</div>
 </div>
 
 <script>
@@ -136,7 +137,7 @@
     };
 
     let activeProfileName = "", profiles = {}, inBattle = false, activeP = [], activeE = [], meteorTimer = 0;
-    const STORAGE_KEY = 'citadel_v21_final';
+    const STORAGE_KEY = 'citadel_v22_final';
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles)); }
@@ -163,9 +164,9 @@
     function loadProfile() {
         const p = profiles[activeProfileName];
         if(!p) return;
-        document.getElementById('money').innerText = Math.floor(p.money);
+        document.getElementById('money').innerText = Math.floor(p.money).toLocaleString();
         document.getElementById('lvl').innerText = p.lvl;
-        document.getElementById('upCost').innerText = Math.floor(p.upCost);
+        document.getElementById('upCost').innerText = Math.floor(p.upCost).toLocaleString();
         document.getElementById('battleNum').innerText = p.battleNum;
         document.getElementById('era-tag').innerText = `ЭПОХА: ${['','СРЕДНЕВЕКОВЬЕ','МОДЕРН','КОСМОС'][p.era]}`;
         for(let i=1; i<=3; i++) document.getElementById(`shop-${i}`).style.display = (p.era === i ? 'block' : 'none');
@@ -174,9 +175,9 @@
         const hasAll = unitsOfEra.every(t => p.armyInv.some(u => u.type === t));
         document.getElementById('era-btn').style.display = (hasAll && p.lvl >= p.era*10 && p.bossDefeated && p.era < 3) ? 'block' : 'none';
         
-        const c = ['', '#607d8b', '#263238', '#006064'][p.era];
-        document.querySelectorAll('.tower').forEach(t => t.style.background = c);
-        document.getElementById('tm').style.height = (60 + p.lvl*2) + '%';
+        const colors = ['', '#607d8b', '#263238', '#006064'];
+        document.querySelectorAll('.tower').forEach(t => t.style.background = colors[p.era]);
+        document.getElementById('tm').style.height = Math.min(95, 60 + p.lvl*2) + '%';
     }
 
     function buy(type) {
@@ -185,20 +186,31 @@
             p.money -= config[type].cost; p.armyInv.push({type});
             save(); loadProfile(); playSnd(1000, 'sine', 0.1, 0.1);
         } else { 
-            document.getElementById('money').parentElement.classList.add('money-error'); 
-            setTimeout(()=>document.getElementById('money').parentElement.classList.remove('money-error'), 400); 
+            const m = document.getElementById('money').parentElement;
+            m.classList.add('money-error'); setTimeout(()=>m.classList.remove('money-error'), 400); 
         }
     }
 
-    function addMoney() { let p = profiles[activeProfileName]; p.money += (p.lvl * 20 * p.era); loadProfile(); playSnd(800, 'sine', 0.05, 0.1); }
-    function upgrade() { let p = profiles[activeProfileName]; if(p.money >= p.upCost && p.lvl < p.era*10) { p.money -= p.upCost; p.lvl++; p.upCost *= 1.62; save(); loadProfile(); } }
+    function upgrade() {
+        let p = profiles[activeProfileName];
+        if(p.money >= p.upCost && p.lvl < p.era*10) {
+            p.money -= p.upCost; p.lvl++; p.upCost *= 1.62;
+            save(); loadProfile(); playSnd(500, 'triangle', 0.3, 0.2);
+        }
+    }
 
     function startBattle() {
         if(inBattle || !profiles[activeProfileName].armyInv.length) return;
         inBattle = true; document.getElementById('units-layer').innerHTML = ""; activeP = []; activeE = [];
         const p = profiles[activeProfileName];
+        
         p.armyInv.forEach((u, i) => setTimeout(() => spawnUnit(u.type, true), i*400));
-        for(let i=0; i<3+p.battleNum; i++) setTimeout(() => spawnUnit(Object.keys(config)[Math.floor(Math.random()*4)], false), i*600);
+        
+        for(let i=0; i<3+p.battleNum; i++) {
+            const types = Object.keys(config).filter(k => config[k].e === p.era);
+            const randType = types[Math.floor(Math.random()*types.length)];
+            setTimeout(() => spawnUnit(randType, false), i*600);
+        }
         requestAnimationFrame(battleLoop);
     }
 
@@ -208,33 +220,56 @@
         el.innerHTML = `<div class="hp-bar"><div class="hp-fill"></div></div><div class="h-head"></div><div class="h-body" style="background:${conf.color}"></div><div class="h-leg l"></div><div class="h-leg r"></div><div class="w-ico">${conf.ico}</div>`;
         if(conf.scale) el.style.transform = `scale(${conf.scale})`;
         document.getElementById('units-layer').appendChild(el);
-        const obj = { el, hp: conf.hp, maxHp: conf.hp, dmg: conf.dmg, isP, x: isP ? 50 : 850, y: 150 + Math.random()*200 };
+        const obj = { el, hp: conf.hp, maxHp: conf.hp, dmg: conf.dmg, isP, x: isP ? 20 : 850, y: 150 + Math.random()*200 };
         if(isP) activeP.push(obj); else activeE.push(obj);
     }
 
     function battleLoop() {
         if(!inBattle) return;
+
         activeP.forEach(p => { 
-            const target = activeE.sort((a,b) => a.x - b.x)[0];
-            if(target && Math.abs(p.x - target.x) < 60) { target.hp -= p.dmg/60; updateHP(target); p.el.classList.remove('walking'); }
-            else { p.x += 2; p.el.classList.add('walking'); }
+            const enemiesInRange = activeE.filter(e => Math.abs(p.x - e.x) < 55);
+            if(enemiesInRange.length > 0) {
+                enemiesInRange[0].hp -= p.dmg/60; 
+                updateHP(enemiesInRange[0]);
+                p.el.classList.remove('walking');
+            } else { p.x += 1.8; p.el.classList.add('walking'); }
         });
+
         activeE.forEach(e => {
-            const target = activeP.sort((a,b) => b.x - a.x)[0];
-            if(target && Math.abs(e.x - target.x) < 60) { target.hp -= e.dmg/60; updateHP(target); e.el.classList.remove('walking'); }
-            else { e.x -= 1.5; e.el.classList.add('walking'); }
+            const targetsInRange = activeP.filter(p => Math.abs(e.x - p.x) < 55);
+            if(targetsInRange.length > 0) {
+                targetsInRange[0].hp -= e.dmg/60; 
+                updateHP(targetsInRange[0]);
+                e.el.classList.remove('walking');
+            } else { e.x -= 1.4; e.el.classList.add('walking'); }
         });
-        activeP = activeP.filter(u => u.hp > 0 || (u.el.remove() && false));
-        activeE = activeE.filter(u => u.hp > 0 || (u.el.remove() && false));
-        [...activeP, ...activeE].forEach(u => { u.el.style.left = u.x + 'px'; u.el.style.top = u.y + 'px'; u.el.style.zIndex = Math.floor(u.y); });
-        if(!activeE.length) endBattle(true); else if(!activeP.length) endBattle(false); else requestAnimationFrame(battleLoop);
+
+        activeP = activeP.filter(u => { if(u.hp <= 0) { u.el.remove(); return false; } return true; });
+        activeE = activeE.filter(u => { if(u.hp <= 0) { u.el.remove(); return false; } return true; });
+
+        [...activeP, ...activeE].forEach(u => {
+            u.el.style.left = u.x + 'px';
+            u.el.style.top = u.y + 'px';
+            u.el.style.zIndex = Math.floor(u.y);
+        });
+
+        if(!activeE.length) endBattle(true);
+        else if(!activeP.length) endBattle(false);
+        else requestAnimationFrame(battleLoop);
     }
 
-    function updateHP(u) { u.el.querySelector('.hp-fill').style.width = (u.hp/u.maxHp*100)+'%'; }
+    function updateHP(u) { u.el.querySelector('.hp-fill').style.width = Math.max(0, (u.hp/u.maxHp*100))+'%'; }
+    
     function endBattle(win) {
         inBattle = false; let p = profiles[activeProfileName];
-        if(win) { p.money += p.battleNum*300; p.battleNum++; if(p.battleNum % 5 === 0) p.bossDefeated = true; addLog("ПОБЕДА!"); }
-        else { p.armyInv = []; addLog("ПОРАЖЕНИЕ!"); }
+        if(win) {
+            p.money += p.battleNum*250; p.battleNum++;
+            if(p.battleNum % 5 === 0) p.bossDefeated = true;
+            addLog("ПОБЕДА!");
+        } else {
+            p.armyInv = []; addLog("ПОРАЖЕНИЕ! Армия разбита.");
+        }
         save(); loadProfile();
     }
 
@@ -246,17 +281,18 @@
             document.body.appendChild(m); setTimeout(() => m.style.transform = `translateY(${ty+oy+100}px)`, 20);
             setTimeout(() => { 
                 const r = document.createElement('div'); r.className = 'ring'; r.style.left = (tx+ox)+'px'; r.style.top = (ty+oy)+'px'; document.body.appendChild(r); setTimeout(()=>r.remove(), 600);
-                activeE.forEach(e => { if(Math.abs((e.x+320)-(tx+ox)) < 150) { e.hp -= 25000; updateHP(e); } });
+                activeE.forEach(e => { if(Math.abs((e.x+320)-(tx+ox)) < 150) { e.hp -= 30000; updateHP(e); } });
                 playSnd(60, 'sawtooth', 0.5, 0.3); m.remove();
             }, 400);
         }, i*150);
     }
 
+    function addMoney() { let p = profiles[activeProfileName]; p.money += (p.lvl * 25 * p.era); loadProfile(); playSnd(800, 'sine', 0.05, 0.1); }
     function decorateField() { const f = document.getElementById('field'); for(let i=0; i<100; i++) { const b = document.createElement('div'); b.className = 'grass-blade'; b.style.left = Math.random()*100+'%'; b.style.top = Math.random()*100+'%'; f.appendChild(b); } }
     function renderProfiles() { const l = document.getElementById('profile-list'); l.innerHTML = ""; Object.keys(profiles).forEach(n => { const b = document.createElement('button'); b.className = `profile-btn ${n===activeProfileName?'active':''}`; b.innerText = n; b.onclick = () => { if(!inBattle) { activeProfileName = n; renderProfiles(); loadProfile(); } }; l.appendChild(b); }); }
-    function createNewProfile() { const n = prompt("Имя:"); if(n) { profiles[n] = { money: 1000, lvl: 1, upCost: 50, era: 1, battleNum: 1, armyInv: [], bossDefeated: false }; activeProfileName = n; save(); renderProfiles(); loadProfile(); } }
-    function deleteCurrentProfile() { if(Object.keys(profiles).length > 1) { delete profiles[activeProfileName]; activeProfileName = Object.keys(profiles)[0]; save(); location.reload(); } }
-    function checkEraTransfer() { let p = profiles[activeProfileName]; p.era++; p.bossDefeated = false; save(); loadProfile(); }
+    function createNewProfile() { const n = prompt("Имя Лорда:"); if(n) { profiles[n] = { money: 1000, lvl: 1, upCost: 50, era: 1, battleNum: 1, armyInv: [], bossDefeated: false }; activeProfileName = n; save(); renderProfiles(); loadProfile(); } }
+    function deleteCurrentProfile() { if(Object.keys(profiles).length > 1 && confirm("Удалить этот профиль навсегда?")) { delete profiles[activeProfileName]; activeProfileName = Object.keys(profiles)[0]; save(); location.reload(); } }
+    function checkEraTransfer() { let p = profiles[activeProfileName]; p.era++; p.bossDefeated = false; save(); loadProfile(); addLog("НОВАЯ ЭРА НАСТУПИЛА!"); }
     window.oncontextmenu = (e) => { e.preventDefault(); if(e.clientX > 320) spawnMeteorRain(e.clientX, e.clientY); };
     init();
 </script>
