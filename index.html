@@ -359,31 +359,54 @@
 }
 
     
-    function upgrade() { 
+        function upgrade() { 
         let p = profiles[activeProfileName]; 
-        let maxLvl = p.era === 1 ? 10 : 20; // Лимит уровня растет с эрой
+        let maxLvl = p.era === 1 ? 10 : 20; 
         if(p.money >= p.upCost && p.lvl < maxLvl) { 
-            p.money -= p.upCost; p.lvl++; p.upCost *= 1.8; 
-            save(); loadProfile(); 
-        } 
+            p.money -= p.upCost; 
+            p.lvl++; 
+            p.upCost *= 1.8; 
+            playSnd(500, 'triangle', 0.5, 0.2);
+            save(); 
+            loadProfile(); 
+        } else if (p.lvl >= maxLvl) {
+            addLog("Дворец на максимуме для этой эры!");
+        }
     }
     
     function updateCastleGraphics(lvl, era) {
         const ts1 = document.getElementById('ts1'), ts2 = document.getElementById('ts2'), tm = document.getElementById('tm');
+        
         let color = era === 1 ? '#ffc107' : (era === 2 ? 'cyan' : '#ff00ff');
         
-        // Масштабирование: замок становится шире и выше
+        // Кирпичный градиент для заливки
+        const brickGrad = `repeating-linear-gradient(
+            45deg,
+            #455a64,
+            #455a64 10px,
+            #37474f 10px,
+            #37474f 20px
+        )`;
+
+        // Высота (в %)
+        ts1.style.height = (35 + lvl * 4) + '%';
+        ts2.style.height = (35 + lvl * 4) + '%';
+        tm.style.height = (65 + lvl * 3) + '%';
+        
+        // Ширина (в px)
         ts1.style.width = (60 + lvl * 2) + 'px';
         ts2.style.width = (60 + lvl * 2) + 'px';
         tm.style.width = (150 + lvl * 5) + 'px';
-        
-        [ts1, ts2, tm].forEach(el => {
-            el.style.borderColor = color;
-            el.style.boxShadow = `0 0 ${lvl * 5}px ${color}`;
-            if(era === 3) el.style.filter = "hue-rotate(45deg) brightness(1.5)";
-        });
-    }
 
+        [ts1, ts2, tm].forEach(el => {
+            el.style.background = brickGrad; 
+            el.style.borderColor = color;
+            el.style.boxShadow = `0 0 ${lvl * 5}px ${color}, inset 0 0 15px rgba(0,0,0,0.5)`;
+            if(era === 3) el.style.filter = "hue-rotate(45deg) brightness(1.2) contrast(1.2)";
+        });
+        
+        document.getElementById('main-dome').style.background = lvl >= 10 ? color : '#455a64';
+    }
 
     function toggleNight() {
         isNight = !isNight;
@@ -396,6 +419,8 @@
             field.style.filter = "none";
             ui.style.background = "#111";
         }
+    }
+
     }
 
     function createUnit(u, isE, isB = false) {
@@ -619,13 +644,25 @@
         if(n) { createProfile(n); activeProfileName = n; renderProfiles(); loadProfile(); }
     }
     function deleteCurrentProfile() {
-        if(confirm("Удалить этот мир?")) { delete profiles[activeProfileName]; location.reload(); }
+    // Проверка, чтобы не удалить последний профиль
+    if(Object.keys(profiles).length <= 1) {
+        alert("Нельзя удалить единственный мир! Создайте новый, прежде чем удалять этот.");
+        return;
     }
+    
+    if(confirm("Удалить этот мир навсегда?")) { 
+        delete profiles[activeProfileName]; // Удаляем из объекта
+        save(); // ВАЖНО: сохраняем обновленный список (без этого профиля) в localStorage
+        location.reload(); // Перезагружаем страницу
+    }
+}
+
 
     init();
 </script>
 </body>
 </html>
+
 
 
 
