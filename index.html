@@ -10,6 +10,13 @@
         @keyframes gradient-anim { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes ringGrow { 0% { transform: translate(-50%, -50%) scale(0.1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(3); opacity: 0; } }
         @keyframes shake { 0% { transform: translate(2px, 2px); } 20% { transform: translate(-4px, -1px); } 40% { transform: translate(4px, 1px); } 60% { transform: translate(-2px, 3px); } 80% { transform: translate(3px, -2px); } 100% { transform: translate(0, 0); } }
+        @keyframes moneyShake {
+            0%, 100% { transform: translateX(0); color: var(--gold); }
+            25% { transform: translateX(-10px); color: #f44336; }
+            75% { transform: translateX(10px); color: #f44336; }
+        }
+        .money-error { animation: moneyShake 0.4s ease-in-out; }
+
 
         :root { 
             --gold: #ffc107; --stone: #607d8b; --stone-drk: #263238; 
@@ -294,23 +301,29 @@
         
         updateCastleGraphics(p.lvl, p.era);
     }
-
+    
     function upgrade() { 
         let p = profiles[activeProfileName]; 
-        // Лимиты: 10 для 1 эры, 20 для 2 эры, 30 для 3 эры
-        let maxLvl = p.era === 1 ? 10 : (p.era === 2 ? 20 : 30); 
+        let limit = p.era === 1 ? 10 : (p.era === 2 ? 20 : 30); 
+        const moneyEl = document.getElementById('money');
         
-        if(p.money >= p.upCost && p.lvl < maxLvl) { 
+        if(p.money >= p.upCost && p.lvl < limit) { 
             p.money -= p.upCost; 
             p.lvl++; 
             p.upCost *= 1.9; 
             playSnd(500, 'triangle', 0.5, 0.2); 
             save(); 
-            loadProfile(); 
-        } else if (p.lvl >= maxLvl) { 
-            addLog("Максимум эры достигнут! Нужно эволюционировать."); 
+            loadProfile(); // Мгновенное обновление UI
+        } else if (p.lvl >= limit) { 
+            addLog("Максимум эры достигнут!"); 
+        } else {
+            // Тряска если нет денег на апгрейд
+            moneyEl.parentElement.classList.add('money-error');
+            setTimeout(() => moneyEl.parentElement.classList.remove('money-error'), 400);
         }
     }
+
+
 
     function updateCastleGraphics(lvl, era) {
         const ts1 = document.getElementById('ts1'), ts2 = document.getElementById('ts2'), tm = document.getElementById('tm');
@@ -363,12 +376,19 @@
                     e.dom.remove(); 
                     profiles[activeProfileName].money += (e.isB ? 5000 : 150) * p.era;
                     if(e.isB) profiles[activeProfileName].bossDefeated = true;
-                    activeP.forEach(pU => { pU.data.xp = Math.min(10, (pU.data.xp||0) + 1); });
-                    loadProfile(); return false;
-                } return true;
+                    activeP.forEach(pU => { 
+                        pU.data.xp = Math.min(10, (pU.data.xp||0) + 1); 
+                    });
+            
+                    // ПРАВИЛЬНО ТАК: сначала звук, потом обновление экрана
+                    playSnd(800, 'sine', 0.05, 0.1); 
+                    loadProfile(); 
+
+                    return false;
+                } 
+                return true;
             });
-        }, 100);
-    }
+
 
     function endBattle() {
         clearInterval(battleLoop); inBattle = false;
@@ -439,17 +459,26 @@
 
     function buy(t) { 
         let p = profiles[activeProfileName]; 
+        const moneyEl = document.getElementById('money');
+    
         if(p.money >= config[t].cost) { 
             p.money -= config[t].cost; 
             p.armyInv.push({type: t, level: 1, xp: 0}); 
             playSnd(1000, 'sine', 0.1, 0.1); 
+            
             if(config[t].scale > 3) addLog("ВЫЗВАН ВЕЛИКИЙ ТИТАН!");
+            
             save(); 
-            loadProfile(); 
+            loadProfile(); // Мгновенное обновление UI
         } else { 
-            alert("Недостаточно золота для найма!"); 
+            // Эффект нехватки денег
+            moneyEl.parentElement.classList.add('money-error');
+            setTimeout(() => moneyEl.parentElement.classList.remove('money-error'), 400);
+            playSnd(150, 'sawtooth', 0.2, 0.3); // Звук ошибки
         }
     }
+
+
 
     function toggleNight() {
         isNight = !isNight;
@@ -520,5 +549,6 @@
 </script>
 </body>
 </html>
+
 
 
