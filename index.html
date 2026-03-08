@@ -222,56 +222,77 @@
     }
 
     function createMeteorEffect(tx, ty) {
-        const m = document.createElement('div');
-        m.className = 'meteor';
-        
-        // Появляется высоко и правее точки удара
-        const startX = tx + 400;
-        const startY = ty - 800;
-        
-        m.style.left = startX + 'px';
-        m.style.top = startY + 'px';
-        document.body.appendChild(m);
+    const m = document.createElement('div');
+    m.className = 'meteor';
+    
+    // 1. Точка появления: высоко в небе и чуть правее цели (для полета по диагонали)
+    const fallDistanceY = 800; // Высота падения
+    const fallDistanceX = 400; // Смещение по горизонтали
+    
+    const startX = tx + fallDistanceX;
+    const startY = ty - fallDistanceY;
+    
+    m.style.left = startX + 'px';
+    m.style.top = startY + 'px';
+    document.body.appendChild(m);
 
-        // Запуск анимации (через небольшой таймаут, чтобы браузер успел отрисовать старт)
+    // 2. Эффект взрывной волны (огненное кольцо)
+    function spawnRing(x, y) {
+        const ring = document.createElement('div');
+        ring.style.cssText = `
+            position:absolute; left:${x-20}px; top:${y-20}px; 
+            width:40px; height:40px; border:4px solid orange; 
+            border-radius:50%; pointer-events:none; z-index:5000;
+            transition: all 0.5s ease-out; opacity:1;
+        `;
+        document.body.appendChild(ring);
         setTimeout(() => {
-            m.style.transform = `translate(-400px, 800px)`;
-            
-            // Момент столкновения
-            setTimeout(() => {
-                // Тряска экрана
-                const field = document.getElementById('field');
-                field.classList.add('shake-anim');
-                setTimeout(() => field.classList.remove('shake-anim'), 500);
-
-                // Звук взрыва (низкочастотный)
-                playSnd(50 + Math.random() * 30, 'sine', 0.8, 0.5);
-
-                // Урон врагам в радиусе взрыва
-                activeE.forEach(e => {
-                    // ТЕПЕРЬ ПРАВИЛЬНО: e.x - (tx - 320)
-                    // Мы переводим клик (tx) в координаты поля, вычитая 320px
-                    const targetXInField = tx - 320; 
-                    const dx = e.x - targetXInField;
-                    const dy = e.y - ty;
-                    
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                
-                    if (dist < 180) { 
-                        const dmg = 8000 * (profiles[activeProfileName].era || 1);
-                        e.hp -= dmg;
-                        spawnDamage(e.x, e.y, dmg);
-                        updateHP(e);
-                    }
-                });
-
-
-                // Удаляем метеорит после взрыва
-                m.style.opacity = '0';
-                setTimeout(() => m.remove(), 200);
-            }, 500); // Время полета совпадает с transition в CSS
-        }, 20);
+            ring.style.transform = "scale(8)";
+            ring.style.opacity = "0";
+            ring.style.borderColor = "red";
+            setTimeout(() => ring.remove(), 500);
+        }, 10);
     }
+
+    // Запуск анимации
+    setTimeout(() => {
+        // 3. ТЕПЕРЬ ПРАВИЛЬНО: Летим ровно в точку (tx, ty)
+        // Мы смещаемся ровно на столько, на сколько отошли при спавне
+        m.style.transform = `translate(-${fallDistanceX}px, ${fallDistanceY}px)`;
+        
+        setTimeout(() => {
+            // Тряска экрана
+            const field = document.getElementById('field');
+            field.classList.add('shake-anim');
+            setTimeout(() => field.classList.remove('shake-anim'), 500);
+
+            // Визуальный взрыв (кольцо)
+            spawnRing(tx, ty);
+
+            // Звук взрыва
+            playSnd(50 + Math.random() * 30, 'sine', 0.8, 0.5);
+
+            // Урон врагам
+            activeE.forEach(e => {
+                const targetXInField = tx - 320; 
+                const dx = e.x - targetXInField;
+                const dy = e.y - ty;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+            
+                if (dist < 200) { // Чуть увеличили радиус
+                    const dmg = 8000 * (profiles[activeProfileName].era || 1);
+                    e.hp -= dmg;
+                    spawnDamage(e.x, e.y, dmg);
+                    updateHP(e);
+                }
+            });
+
+            m.style.opacity = '0';
+            setTimeout(() => m.remove(), 200);
+        }, 500); 
+    }, 20);
+}
+
 
 
     function init() {
@@ -476,4 +497,5 @@
 </script>
 </body>
 </html>
+
 
