@@ -55,7 +55,14 @@
             overflow: hidden; transition: filter 1s ease;
         }
         .shake-anim { animation: shake 0.4s; }
-
+        .grass-blade {
+            position: absolute; width: 2px; height: 6px; 
+            background: #1b5e20; border-radius: 2px; opacity: 0.6; pointer-events: none;
+        }
+        .flower {
+            position: absolute; width: 4px; height: 4px; 
+            border-radius: 50%; opacity: 0.8; pointer-events: none;
+        }
         /* КРЕПОСТЬ */
         #castle-wrap { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 280px; height: 450px; z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
         .tower { border: 3px solid #111; transition: 0.5s; position: relative; }
@@ -249,41 +256,68 @@
     }
 
     // ЛОГИКА ПРОФИЛЕЙ
-        function init() {
+    function init() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if(saved) profiles = JSON.parse(saved);
-        if(!Object.keys(profiles).length) createProfile("Лорд");
+        
+        if(!Object.keys(profiles).length) {
+            createProfile("Лорд");
+        }
         activeProfileName = Object.keys(profiles)[0];
         
         setInterval(() => {
+            const el = document.getElementById('met-status');
+            if(!el) return;
             if(meteorTimer > 0) {
                 meteorTimer--;
-                document.getElementById('met-status').innerText = `☄️ ОРУДИЕ БОГОВ: ${meteorTimer}с`;
+                el.innerText = `☄️ ОРУДИЕ БОГОВ: ${meteorTimer}с`;
             } else {
-                document.getElementById('met-status').innerText = `☄️ ОРУДИЕ БОГОВ: ГОТОВО`;
+                el.innerText = `☄️ ОРУДИЕ БОГОВ: ГОТОВО`;
             }
         }, 1000);
 
-        renderProfiles(); loadProfile();
+        decorateField(); 
+        renderProfiles(); 
+        loadProfile();
+    }
+
+    function decorateField() {
+        const field = document.getElementById('field');
+        if(!field) return;
+        for(let i=0; i<150; i++) {
+            const blade = document.createElement('div');
+            blade.className = 'grass-blade';
+            blade.style.left = Math.random() * 100 + '%';
+            blade.style.top = Math.random() * 100 + '%';
+            blade.style.transform = `rotate(${Math.random() * 40 - 20}deg)`;
+            field.appendChild(blade);
+            
+            if(Math.random() > 0.8) {
+                const flower = document.createElement('div');
+                flower.className = 'flower';
+                flower.style.left = Math.random() * 100 + '%';
+                flower.style.top = Math.random() * 100 + '%';
+                flower.style.background = ['#fff', '#ffeb3b', '#f44336'][Math.floor(Math.random()*3)];
+                field.appendChild(flower);
+            }
+        }
     }
 
     function loadProfile() {
         const p = profiles[activeProfileName];
-        
-        // ОБЯЗАТЕЛЬНО ВЕРНИ ЭТИ СТРОКИ:
+        if(!p) return;
+
         document.getElementById('money').innerText = Math.floor(p.money);
         document.getElementById('lvl').innerText = p.lvl;
         document.getElementById('upCost').innerText = Math.floor(p.upCost);
         document.getElementById('battleNum').innerText = p.battleNum;
         document.getElementById('era-tag').innerText = `ЭПОХА: ${['','СРЕДНЕВЕКОВЬЕ','МОДЕРН','КОСМОС'][p.era]}`;
 
-        // Проверка магазинов
         for(let i=1; i<=3; i++) {
             const shop = document.getElementById(`shop-${i}`);
             if(shop) shop.style.display = (p.era === i ? 'block' : 'none');
         }
 
-        // Проверка: есть ли все типы войск текущей эры в армии
         const currentEraConfigs = Object.keys(config).filter(key => config[key].e === p.era);
         const hasAllUnits = currentEraConfigs.every(type => 
             p.armyInv.some(soldier => soldier.type === type)
@@ -300,9 +334,10 @@
         }
         
         updateCastleGraphics(p.lvl, p.era);
-    }
+    } // ТЕПЕРЬ ТУТ ТОЛЬКО ОДНА СКОБКА
+
     
-    function upgrade() { 
+        function upgrade() { 
         let p = profiles[activeProfileName]; 
         let limit = p.era === 1 ? 10 : (p.era === 2 ? 20 : 30); 
         const moneyEl = document.getElementById('money');
@@ -310,18 +345,19 @@
         if(p.money >= p.upCost && p.lvl < limit) { 
             p.money -= p.upCost; 
             p.lvl++; 
-            p.upCost *= 1.9; 
+            // Новый коэффициент 1.62 даст ~500к на 20 уровне
+            p.upCost *= 1.62; 
             playSnd(500, 'triangle', 0.5, 0.2); 
             save(); 
-            loadProfile(); // Мгновенное обновление UI
+            loadProfile();
         } else if (p.lvl >= limit) { 
             addLog("Максимум эры достигнут!"); 
         } else {
-            // Тряска если нет денег на апгрейд
             moneyEl.parentElement.classList.add('money-error');
             setTimeout(() => moneyEl.parentElement.classList.remove('money-error'), 400);
         }
     }
+
 
 
 
@@ -506,8 +542,10 @@
     function createNewProfile() {
         const n = prompt("Введите имя нового Лорда:"); 
         if(n && n.trim() !== "") { 
-            createProfile(n.trim()); 
-            activeProfileName = n.trim(); 
+            const name = n.trim();
+            profiles[name] = { money: 500, lvl: 1, upCost: 50, armyInv: [], battleNum: 1, era: 1, bossDefeated: false };
+            activeProfileName = name;
+            save(); // Сразу сохраняем в память
             renderProfiles(); 
             loadProfile(); 
         }
@@ -554,6 +592,7 @@
 </script>
 </body>
 </html>
+
 
 
 
