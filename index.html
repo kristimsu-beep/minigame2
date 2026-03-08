@@ -145,24 +145,24 @@
 
 <script>
     // КОНФИГУРАЦИЯ ЮНИТОВ
-        const config = {
-        sword: { ico: '⚔️', cost: 5, hp: 100, dmg: 35, color: '#1565c0', e: 1 },
-        mace: { ico: '🔨', cost: 25, hp: 140, dmg: 55, color: '#6d4c41', e: 1 },
-        rider: { ico: '🏇', cost: 50, hp: 180, dmg: 75, color: '#1e88e5', e: 1 },
-        cannon: { ico: '💣', cost: 100, hp: 120, dmg: 220, color: '#424242', e: 1 },
-        giant: { ico: '👹', cost: 250, hp: 1100, dmg: 400, color: '#1b5e20', scale: 1.6, e: 1 },
-        iron_guard: { ico: '🛡️', cost: 1000, hp: 4500, dmg: 200, color: '#455a64', scale: 1.8, e: 1 },
-        armored_car: { ico: '🚜', cost: 2500, hp: 13000, dmg: 600, color: '#37474f', scale: 2.2, e: 1 },
-        soldier: { ico: '🔫', cost: 5000, hp: 28000, dmg: 1800, color: '#2e7d32', e: 2 },
-        heavy: { ico: '🔥', cost: 10000, hp: 55000, dmg: 4500, color: '#c62828', scale: 1.3, e: 2 },
-        tank: { ico: '📟', cost: 25000, hp: 150000, dmg: 10000, color: '#1b5e20', scale: 2.5, e: 2 },
-        jet: { ico: '✈️', cost: 50000, hp: 90000, dmg: 25000, color: '#37474f', scale: 2.8, e: 2 },
-        general: { ico: '🎖️', cost: 100000, hp: 250000, dmg: 35000, color: '#1a237e', isGeneral: true, e: 2 },
-        titan: { ico: '🗿', cost: 250000, hp: 600000, dmg: 60000, color: '#424242', scale: 3.5, e: 3 },
-        fly_titan: { ico: '🦅', cost: 500000, hp: 900000, dmg: 90000, color: '#1a237e', scale: 3.8, e: 3 },
-        mecha_titan: { ico: '🤖', cost: 1000000, hp: 2200000, dmg: 160000, color: '#006064', scale: 4.2, e: 3 },
-        drone_titan: { ico: '🛰️', cost: 5000000, hp: 6000000, dmg: 350000, color: '#311b92', isGeneral: true, scale: 4.5, e: 3 },
-        ultimate_titan: { ico: '🌌', cost: 10000000, hp: 18000000, dmg: 1100000, color: '#000', scale: 5.5, e: 3 }
+    const config = {
+        sword: { ico: '⚔️', cost: 5, hp: 100, dmg: 35, color: '#1565c0' },
+        mace: { ico: '🔨', cost: 25, hp: 140, dmg: 55, color: '#6d4c41' },
+        rider: { ico: '🏇', cost: 50, hp: 180, dmg: 75, color: '#1e88e5' },
+        cannon: { ico: '💣', cost: 100, hp: 120, dmg: 220, color: '#424242' },
+        giant: { ico: '👹', cost: 250, hp: 1100, dmg: 400, color: '#1b5e20', scale: 1.6 },
+        iron_guard: { ico: '🛡️', cost: 1000, hp: 4500, dmg: 200, color: '#455a64', scale: 1.8 },
+        armored_car: { ico: '🚜', cost: 2500, hp: 13000, dmg: 600, color: '#37474f', scale: 2.2 },
+        soldier: { ico: '🔫', cost: 5000, hp: 28000, dmg: 1800, color: '#2e7d32' },
+        heavy: { ico: '🔥', cost: 10000, hp: 55000, dmg: 4500, color: '#c62828', scale: 1.3 },
+        tank: { ico: '📟', cost: 25000, hp: 150000, dmg: 10000, color: '#1b5e20', scale: 2.5 },
+        jet: { ico: '✈️', cost: 50000, hp: 90000, dmg: 25000, color: '#37474f', scale: 2.8 },
+        general: { ico: '🎖️', cost: 100000, hp: 250000, dmg: 35000, color: '#1a237e', isGeneral: true },
+        titan: { ico: '🗿', cost: 250000, hp: 600000, dmg: 60000, color: '#424242', scale: 3.5 },
+        fly_titan: { ico: '🦅', cost: 500000, hp: 900000, dmg: 90000, color: '#1a237e', scale: 3.8 },
+        mecha_titan: { ico: '🤖', cost: 1000000, hp: 2200000, dmg: 160000, color: '#006064', scale: 4.2 },
+        drone_titan: { ico: '🛰️', cost: 5000000, hp: 6000000, dmg: 350000, color: '#311b92', isGeneral: true, scale: 4.5 },
+        ultimate_titan: { ico: '🌌', cost: 10000000, hp: 18000000, dmg: 1100000, color: '#000', scale: 5.5 }
     };
 
     let activeProfileName = "", profiles = {}, inBattle = false, activeP = [], activeE = [], battleLoop, isNight = false;
@@ -182,56 +182,40 @@
     }
 
     // МЕТЕОРИТНЫЙ ДОЖДЬ
-        // МЕТЕОРИТНЫЙ ДОЖДЬ (Исправленное имя функции)
-    window.oncontextmenu = (e) => { 
-        e.preventDefault(); 
-        spawnMeteorRain(e.clientX, e.clientY); 
-    };
+    window.oncontextmenu = (e) => { e.preventDefault(); spawnMeteorShower(e.clientX, e.clientY); };
 
-
-        function spawnMeteorRain(tx, ty) {
-        if (meteorTimer > 0) { addLog(`Перезарядка систем: ${meteorTimer}с`); return; }
-        meteorTimer = 35; // Увеличил КД для баланса такой мощи
-        addLog("ВНИМАНИЕ: ОГНЕННЫЙ ШКВАЛ ВЫЗВАН!");
-
-        for(let i=0; i<12; i++) { // 12 снарядов!
+    function spawnMeteorShower(tx, ty) {
+        if (meteorTimer > 0) { addLog(`Метеориты на КД: ${meteorTimer}с`); return; }
+        meteorTimer = METEOR_COOLDOWN;
+        
+        // Серия из 3 метеоритов
+        for(let i=0; i<3; i++) {
             setTimeout(() => {
-                const offX = (Math.random() - 0.5) * 250; // Больше разброс
-                const offY = (Math.random() - 0.5) * 50;
+                const offX = (Math.random() - 0.5) * 100;
                 const m = document.createElement('div'); m.className = 'meteor';
-                m.style.left = (tx + offX) + 'px'; m.style.top = '-100px';
-                m.style.filter = `hue-rotate(${Math.random()*50}deg) scale(${0.8 + Math.random()})`;
+                m.style.left = (tx + offX) + 'px'; m.style.top = '-60px';
                 document.body.appendChild(m);
 
-                setTimeout(() => { m.style.transform = `translateY(${ty + offY + 100}px)`; }, 20);
+                setTimeout(() => { m.style.transform = `translateY(${ty + 60}px)`; }, 20);
 
                 setTimeout(() => {
                     const field = document.getElementById('field');
-                    field.classList.add('shake-anim'); 
-                    setTimeout(() => field.classList.remove('shake-anim'), 400);
-                    
-                    // Эффект вспышки при попадании
-                    field.style.background = "white";
-                    setTimeout(() => field.style.background = "", 50);
-
-                    const ring = document.createElement('div'); ring.className = 'ring';
-                    ring.style.left = (tx + offX) + 'px'; ring.style.top = (ty + offY) + 'px';
-                    document.body.appendChild(ring); setTimeout(() => ring.remove(), 600);
-
-                    playSnd(20 + Math.random()*60, 'sawtooth', 1.0, 0.4);
+                    field.classList.add('shake-anim'); setTimeout(() => field.classList.remove('shake-anim'), 400);
+                    spawnRing(tx + offX, ty);
+                    playSnd(40 + Math.random()*40, 'sine', 0.6, 0.4);
 
                     activeE.forEach(e => {
-                        if (Math.abs(e.x - (tx + offX - 320)) < 250) {
-                            const dmg = 30000 * (profiles[activeProfileName].era);
+                        const dist = Math.abs(e.x - (tx + offX - 320));
+                        if (dist < 180) {
+                            const dmg = 12000 * (profiles[activeProfileName].era || 1);
                             e.hp -= dmg; spawnDamage(e.x, e.y, dmg); updateHP(e);
                         }
                     });
-                    m.style.opacity = '0'; setTimeout(() => m.remove(), 150);
-                }, 380);
-            }, i * 150); // Быстрый темп падения
+                    m.style.opacity = '0'; setTimeout(() => m.remove(), 200);
+                }, 450);
+            }, i * 300);
         }
     }
-
 
     function spawnRing(x, y) {
         const r = document.createElement('div'); r.className = 'ring';
@@ -242,7 +226,7 @@
     }
 
     // ЛОГИКА ПРОФИЛЕЙ
-        function init() {
+    function init() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if(saved) profiles = JSON.parse(saved);
         if(!Object.keys(profiles).length) createProfile("Лорд");
@@ -251,65 +235,48 @@
         setInterval(() => {
             if(meteorTimer > 0) {
                 meteorTimer--;
-                document.getElementById('met-status').innerText = `☄️ ОРУДИЕ БОГОВ: ${meteorTimer}с`;
+                document.getElementById('meteor-ui').innerText = `☄️ МЕТЕОРИТЫ: ${meteorTimer}с`;
             } else {
-                document.getElementById('met-status').innerText = `☄️ ОРУДИЕ БОГОВ: ГОТОВО`;
+                document.getElementById('meteor-ui').innerText = `☄️ МЕТЕОРИТЫ: ГОТОВЫ`;
             }
         }, 1000);
 
         renderProfiles(); loadProfile();
     }
 
+    function createProfile(name) {
+        profiles[name] = { money: 100, lvl: 1, upCost: 50, armyInv: [], battleNum: 1, era: 1, bossDefeated: false };
+        save();
+    }
+
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles)); }
+
     function loadProfile() {
         const p = profiles[activeProfileName];
-        
-        // ОБЯЗАТЕЛЬНО ВЕРНИ ЭТИ СТРОКИ:
         document.getElementById('money').innerText = Math.floor(p.money);
         document.getElementById('lvl').innerText = p.lvl;
         document.getElementById('upCost').innerText = Math.floor(p.upCost);
         document.getElementById('battleNum').innerText = p.battleNum;
         document.getElementById('era-tag').innerText = `ЭПОХА: ${['','СРЕДНЕВЕКОВЬЕ','МОДЕРН','КОСМОС'][p.era]}`;
-
-        // Проверка магазинов
-        for(let i=1; i<=3; i++) {
-            const shop = document.getElementById(`shop-${i}`);
-            if(shop) shop.style.display = (p.era === i ? 'block' : 'none');
-        }
-
-        // Проверка: есть ли все типы войск текущей эры в армии
-        const currentEraConfigs = Object.keys(config).filter(key => config[key].e === p.era);
-        const hasAllUnits = currentEraConfigs.every(type => 
-            p.armyInv.some(soldier => soldier.type === type)
-        );
-
-        const reqLvl = p.era === 1 ? 10 : 20; 
-        const eraBtn = document.getElementById('era-btn');
-
-        if (hasAllUnits && p.lvl >= reqLvl && p.bossDefeated && p.era < 3) {
-            eraBtn.style.display = 'block';
-            eraBtn.innerHTML = p.era === 1 ? "🚀 ЭВОЛЮЦИЯ: В МОДЕРН" : "🌌 ЭВОЛЮЦИЯ: В КОСМОС";
-        } else {
-            eraBtn.style.display = 'none';
-        }
         
+        ['shop-1', 'shop-2', 'shop-3'].forEach((s, i) => document.getElementById(s).style.display = (p.era === i+1 ? 'block' : 'none'));
+
+        const eraBtn = document.getElementById('era-btn');
+        if ((p.era === 1 && p.lvl >= 10 && p.bossDefeated) || (p.era === 2 && p.lvl >= 20 && p.bossDefeated)) {
+            eraBtn.style.display = 'block';
+            eraBtn.innerText = p.era === 1 ? "🚀 В МОДЕРН" : "🌌 В КОСМОС";
+        } else { eraBtn.style.display = 'none'; }
+
         updateCastleGraphics(p.lvl, p.era);
     }
 
     function upgrade() { 
         let p = profiles[activeProfileName]; 
-        // Лимиты: 10 для 1 эры, 20 для 2 эры, 30 для 3 эры
-        let maxLvl = p.era === 1 ? 10 : (p.era === 2 ? 20 : 30); 
-        
+        let maxLvl = p.era === 1 ? 10 : 20; 
         if(p.money >= p.upCost && p.lvl < maxLvl) { 
-            p.money -= p.upCost; 
-            p.lvl++; 
-            p.upCost *= 1.9; 
-            playSnd(500, 'triangle', 0.5, 0.2); 
-            save(); 
-            loadProfile(); 
-        } else if (p.lvl >= maxLvl) { 
-            addLog("Максимум эры достигнут! Нужно эволюционировать."); 
-        }
+            p.money -= p.upCost; p.lvl++; p.upCost *= 1.9; 
+            playSnd(500, 'triangle', 0.5, 0.2); save(); loadProfile(); 
+        } else if (p.lvl >= maxLvl) { addLog("Максимум эры! Победи босса!"); }
     }
 
     function updateCastleGraphics(lvl, era) {
@@ -491,33 +458,23 @@
         }
     }
 
-   function checkEraTransfer() {
-    let p = profiles[activeProfileName];
-    
-    // Проверка условий (на всякий случай, хотя кнопка и так скрыта)
-    const currentEraUnits = Object.keys(config).filter(key => config[key].e === p.era);
-    const hasAllUnits = currentEraUnits.every(type => p.armyInv.some(u => u.type === type));
-    const reqLvl = p.era === 1 ? 10 : 20;
-
-    if (hasAllUnits && p.lvl >= reqLvl && p.bossDefeated) {
-        p.era++; 
-        p.money += p.era * 150000; // Жирный бонус за прогресс
-        p.bossDefeated = false;    // Сброс босса для новой эры
-        
-        // Уровень (p.lvl) НЕ сбрасываем, он остается 10 или 20
-        addLog(`ПРОРЫВ: Мы достигли Эпохи ${p.era === 2 ? 'Модерна' : 'Титанов'}!`);
-        
+    function checkEraTransfer() {
+        let p = profiles[activeProfileName];
+        if (p.era === 1 && p.lvl >= 10 && p.bossDefeated) {
+            p.era = 2; p.lvl = 1; p.money += 25000; p.bossDefeated = false;
+            addLog("ЭВОЛЮЦИЯ: ЭПОХА МОДЕРНА!");
+        } else if (p.era === 2 && p.lvl >= 20 && p.bossDefeated) {
+            p.era = 3; p.lvl = 1; p.money += 150000;
+            addLog("ЭВОЛЮЦИЯ: ЭПОХА КОСМИЧЕСКИХ ТИТАНОВ!");
+        } else {
+            alert("Условие не выполнено: нужен макс. уровень дворца и победа над БОССОМ эры!");
+        }
         save(); 
         loadProfile();
-    } else {
-        alert("Условие не выполнено: соберите всех солдат эры, прокачайте дворец и победите БОССА!");
     }
-}
-
 
     // Инициализация
     init();
 </script>
 </body>
 </html>
-
