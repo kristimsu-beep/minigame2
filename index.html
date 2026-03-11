@@ -181,6 +181,8 @@
 
     let activeProfileName = "", profiles = {}, inBattle = false, activeP = [], activeE = [], battleLoop, isNight = false;
     let meteorTimer = 0; const METEOR_COOLDOWN = 20;
+    let myAvatar = localStorage.getItem("pinnogram_avatar") || "https://i.ibb.co";
+    document.getElementById("user-avatar-icon").src = myAvatar;
     const STORAGE_KEY = 'citadel_v12_mega';
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -592,3 +594,4 @@
 </script>
 </body>
 </html>
+
